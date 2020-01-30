@@ -336,7 +336,7 @@ MultirotorMixer::mix_yaw(float yaw, float *outputs)
 void
 MultirotorMixer::fill_matD1(){
     float arr[4*4] = {1.0f, 0.0f, 0.0f, 0.0f,
-                      0.0f, 0.0f, -_structure.r1, 0.0f,
+                      0.0f, 0.0f, _structure.r1, 0.0f,
                       0.0f, _structure.r2, 0.0f, 0.0f,
                       0.0f, 0.0f, 0.0f, _structure.nm};
     matrix::Matrix<float,4,4> marr(arr);
@@ -360,7 +360,14 @@ MultirotorMixer::set_structure_params(){
     fill_matD2();
     _structure.D = _structure.D1*_structure.D2;
 
+    matrix::Matrix<float, 4, 4> I =matrix::inv<float,4>(_structure.D);
+    debug("%f \t %f \t %f \t %f", double(I(0,0)), double(I(0,1)), double(I(0,2)), double(I(0,3)));
+    debug("%f \t %f \t %f \t %f", double(I(1,0)), double(I(1,1)), double(I(1,2)), double(I(1,3)));
+    debug("%f \t %f \t %f \t %f", double(I(2,0)), double(I(2,1)), double(I(2,2)), double(I(2,3)));
+    debug("%f \t %f \t %f \t %f", double(I(3,0)), double(I(3,1)), double(I(3,2)), double(I(3,3)));
 
+    _A_speed =  1.0f/500.0f;
+    _B_speed = -60.0f/50.0f;
 }
 
 void
@@ -371,12 +378,30 @@ MultirotorMixer::compute_rotor_speed(float roll, float pitch, float yaw, float t
     matrix::Matrix<float, 4, 1> X(arr_x);
     //X=AY
     // => Y = (D^t.D)^-1.D^t * X
-    Y = matrix::inv<float,4>(_structure.D.T()*_structure.D) * _structure.D.T() * X;
+    Y = matrix::inv<float,4>(_structure.D) * X;
 
+    int arr[4] = {0,2,3,1};
     //Y.copyTo(outputs);
     for(unsigned i =0; i < _rotor_count; i++)
-        outputs[i] = sqrt(Y(i,0));
-    //debug("new: %f \t %f \t %f \t %f", double(Y(0,0)), double(Y(1,0)), double(Y(2,0)), double(Y(3,0)));
+        outputs[i] = (Y(arr[1],0)>0)?sqrt(Y(arr[1],0)/_structure.mu):0;
+//    if(pitch <0)
+//    {
+//    outputs[3] = 100;
+//    outputs[1] = 100;
+//    }
+//    else
+//    {
+//    outputs[0] = 100;
+//    outputs[2] = 100;return
+//    }
+
+}
+
+void
+MultirotorMixer::compute_outputs(float *outputs)
+{
+    for(unsigned i =0; i < _rotor_count; i++)
+        outputs[i] = _A_speed*outputs[i]+ _B_speed;
 }
 
 unsigned
@@ -386,49 +411,62 @@ MultirotorMixer::mix(float *outputs, unsigned space)
 		return 0;
     }
 
-	float roll    = math::constrain(get_control(0, 0) * _roll_scale, -1.0f, 1.0f);
-	float pitch   = math::constrain(get_control(0, 1) * _pitch_scale, -1.0f, 1.0f);
-	float yaw     = math::constrain(get_control(0, 2) * _yaw_scale, -1.0f, 1.0f);
-	float thrust  = math::constrain(get_control(0, 3), 0.0f, 1.0f);
+//	float roll    = math::constrain(get_control(0, 0) * _roll_scale, -1.0f, 1.0f);
+//	float pitch   = math::constrain(get_control(0, 1) * _pitch_scale, -1.0f, 1.0f);
+//	float yaw     = math::constrain(get_control(0, 2) * _yaw_scale, -1.0f, 1.0f);
+//	float thrust  = math::constrain(get_control(0, 3), 0.0f, 1.0f);
+    float roll    = get_control(0, 0);
+    float pitch   = get_control(0, 1);
+    float yaw     = get_control(0, 2);
+    float thrust  = get_control(0, 3);
 
-	// clean out class variable used to capture saturation
-	_saturation_status.value = 0;
+//	// clean out class variable used to capture saturation
+//	_saturation_status.value = 0;
 
-	// Do the mixing using the strategy given by the current Airmode configuration
-	switch (_airmode) {
-	case Airmode::roll_pitch:
-		mix_airmode_rp(roll, pitch, yaw, thrust, outputs);
-		break;
+//	// Do the mixing using the strategy given by the current Airmode configuration
+//	switch (_airmode) {
+//	case Airmode::roll_pitch:
+//		mix_airmode_rp(roll, pitch, yaw, thrust, outputs);
+//		break;
 
-	case Airmode::roll_pitch_yaw:
-		mix_airmode_rpy(roll, pitch, yaw, thrust, outputs);
-		break;
+//	case Airmode::roll_pitch_yaw:
+//		mix_airmode_rpy(roll, pitch, yaw, thrust, outputs);
+//		break;
 
-	case Airmode::disabled:
-	default: // just in case: default to disabled
-        mix_airmode_disabled(roll, pitch, yaw, thrust, outputs);
-		break;
-	}
+//	case Airmode::disabled:
+//	default: // just in case: default to disabled
+//        mix_airmode_disabled(roll, pitch, yaw, thrust, outputs);
+//		break;
+//	}
 
-    // Apply thrust model and scale outputs to range [idle_speed, 1].
-    // At this point the outputs are expected to be in [0, 1], but they can be outside, for example
-    // if a roll command exceeds the motor band limit.
-    for (unsigned i = 0; i < _rotor_count; i++) {
-        // Implement simple model for static relationship between applied motor pwm and motor thrust
-        // model: thrust = (1 - _thrust_factor) * PWM + _thrust_factor * PWM^2
-        if (_thrust_factor > 0.0f) {
-            outputs[i] = -(1.0f - _thrust_factor) / (2.0f * _thrust_factor) + sqrtf((1.0f - _thrust_factor) *
-                    (1.0f - _thrust_factor) / (4.0f * _thrust_factor * _thrust_factor) + (outputs[i] < 0.0f ? 0.0f : outputs[i] /
-                            _thrust_factor));
-        }
-        outputs[i] = math::constrain(_idle_speed + (outputs[i] * (1.0f - _idle_speed)), _idle_speed, 1.0f);
+//    // Apply thrust model and scale outputs to range [idle_speed, 1].
+//    // At this point the outputs are expected to be in [0, 1], but they can be outside, for example
+//    // if a roll command exceeds the motor band limit.
+//    for (unsigned i = 0; i < _rotor_count; i++) {
+//        // Implement simple model for static relationship between applied motor pwm and motor thrust
+//        // model: thrust = (1 - _thrust_factor) * PWM + _thrust_factor * PWM^2
+//        if (_thrust_factor > 0.0f) {
+//            outputs[i] = -(1.0f - _thrust_factor) / (2.0f * _thrust_factor) + sqrtf((1.0f - _thrust_factor) *
+//                    (1.0f - _thrust_factor) / (4.0f * _thrust_factor * _thrust_factor) + (outputs[i] < 0.0f ? 0.0f : outputs[i] /
+//                            _thrust_factor));
+//        }
+//        outputs[i] = math::constrain(_idle_speed + (outputs[i] * (1.0f - _idle_speed)), _idle_speed, 1.0f);
 
-    }
+//    }
 
 
-    float outpTest[4];
-    compute_rotor_speed(roll, pitch, yaw, thrust, outpTest);
+//    float outpTest[4];
+//    compute_rotor_speed(roll, pitch, yaw, thrust, outpTest);
 //    debug("%f \t %f \t %f \t %f", double(outpTest[0]), double(outpTest[1]), double(outpTest[2]), double(outpTest[3]));
+//    compute_outputs(outpTest);
+//    debug("%f \t %f \t %f \t %f\n", double(outpTest[0]), double(outpTest[1]), double(outpTest[2]), double(outpTest[3]));
+
+    debug("r:%f \t p:%f \t y:%f \t t:%f", double(roll), double(pitch), double(yaw), double(thrust));
+    compute_rotor_speed(roll, pitch, yaw, thrust, outputs);
+    //debug("%f \t %f \t %f \t %f", double(outputs[0]), double(outputs[1]), double(outputs[2]), double(outputs[3]));
+    //debug("%f \t %f \t %f \t %f\n", double(outputs[0]), double(outputs[1]), double(outputs[2]), double(outputs[3]));
+    compute_outputs(outputs);
+    //debug("%f \t %f \t %f \t %f\n", double(outputs[0]), double(outputs[1]), double(outputs[2]), double(outputs[3]));
 
 	// Slew rate limiting and saturation checking
     for (unsigned i = 0; i < _rotor_count; i++) {

@@ -68,19 +68,24 @@ public:
 	};
 
     struct MultirotorStructure {
-        float r1; //distance bras au centre des hélices
-        float r2; //longueure de la partie mobile du bras
-        float nu;
-        float mu;
-        float nm;
+        float r1; //rotor-center distace /x
+        float r2; //rotor-center distace /y
+        float nu; //Ratio anti-torque intensity oversquared rotor speed
+        float mu; //Ratio thrust intensity oversquared rotor speed
+        float nm; //Ratio nu/mu
         matrix::Matrix<float,4,4> D1;
         matrix::Matrix<float,4,4> D2;
         matrix::Matrix<float,4,4> D;
     };
 
     struct EscParams {
-        float K; //distance bras au centre des hélices
-        float U; //longueure de la partie mobile du bras
+        float max;
+        float min;
+    };
+
+    struct SimParams {
+        float a;
+        float b;
     };
 
 
@@ -194,6 +199,7 @@ protected:
      *
      */
     void compute_rotor_speed(float roll, float pitch, float yaw, float thrust, float *outputs);
+    void compute_outputs(float *outputs);
     //void compute_pwm_motors(float* W, float* W_pwm, float offset); // faudrait ajouter des
 
     void fill_matD1();
@@ -281,10 +287,8 @@ private:
 	float 				_delta_out_max{0.0f};
 	float 				_thrust_factor{0.0f};
 
-    float               _kT{5.0f}; //constante moteur poussée
-    float               _kQ{9.41e-7f}; //constante moteur couple
-    float               _kC{0.1f}; //paramter weighting the matrix C
-    float               _kQperkT{0.0923f}; //raport kT/kQ
+    float               _A_speed;
+    float               _B_speed;
 
 
 
@@ -294,10 +298,17 @@ private:
 
 	unsigned			_rotor_count;
 	const Rotor			*_rotors;
-    MultirotorStructure _structure = {.r1=0.13f,
-                                    .r2=0.22f,
-                                    .nu=9.41e-7f,
-                                    .mu=5.0f};
+
+    MultirotorStructure _structure = {.r1=0.22f,
+                                      .r2=0.13f,
+                                      .nu=0.000806428,
+                                      .mu=8.54858e-06};
+//    EscParams _esc = {.min=1000.0f,
+//                      .max=2000.0f
+//                     };
+
+    SimParams _sim = {.a=1000.0f,
+                      .b=100.0f};
 
 
 	float 				*_outputs_prev{nullptr};
