@@ -39,6 +39,8 @@
 #include <math.h>
 #include <matrix/math.hpp>
 
+#define _MULTIROTOR_COUNT_ 4
+
 /**
  * Supported multirotor geometries.
  *
@@ -68,25 +70,16 @@ public:
 	};
 
     struct MultirotorStructure {
-        float r1; //rotor-center distace /x
-        float r2; //rotor-center distace /y
-        float nu; //Ratio anti-torque intensity oversquared rotor speed
-        float mu; //Ratio thrust intensity oversquared rotor speed
-        float nm; //Ratio nu/mu
-        matrix::Matrix<float,4,4> D1;
-        matrix::Matrix<float,4,4> D2;
-        matrix::Matrix<float,4,4> D;
+        float arm_angle[_MULTIROTOR_COUNT_]; //rotor-center distace /x
+        float arm_length; //rotor-center distace /y
+        float tau_lift;
+        float tau_drag;
+        matrix::Matrix<float,4,_MULTIROTOR_COUNT_> D;
+        matrix::Matrix<float,_MULTIROTOR_COUNT_,4> Dinv;
     };
 
-    struct EscParams {
-        float max;
-        float min;
-    };
 
-    struct SimParams {
-        float a;
-        float b;
-    };
+
 
 
 	/**
@@ -202,83 +195,9 @@ protected:
     void compute_outputs(float *outputs);
     //void compute_pwm_motors(float* W, float* W_pwm, float offset); // faudrait ajouter des
 
-    void fill_matD1();
-    void fill_matD2();
     void set_structure_params();
 
 private:
-	/**
-	 * Computes the gain k by which desaturation_vector has to be multiplied
-	 * in order to unsaturate the output that has the greatest saturation.
-	 * @see also minimize_saturation().
-	 *
-	 * @return desaturation gain
-	 */
-	float compute_desaturation_gain(const float *desaturation_vector, const float *outputs, saturation_status &sat_status,
-					float min_output, float max_output) const;
-
-	/**
-	 * Minimize the saturation of the actuators by adding or substracting a fraction of desaturation_vector.
-	 * desaturation_vector is the vector that added to the output outputs, modifies the thrust or angular
-	 * acceleration on a specific axis.
-	 * For example, if desaturation_vector is given to slide along the vertical thrust axis (thrust_scale), the
-	 * saturation will be minimized by shifting the vertical thrust setpoint, without changing the
-	 * roll/pitch/yaw accelerations.
-	 *
-	 * Note that as we only slide along the given axis, in extreme cases outputs can still contain values
-	 * outside of [min_output, max_output].
-	 *
-	 * @param desaturation_vector vector that is added to the outputs, e.g. thrust_scale
-	 * @param outputs output vector that is modified
-	 * @param sat_status saturation status output
-	 * @param min_output minimum desired value in outputs
-	 * @param max_output maximum desired value in outputs
-	 * @param reduce_only if true, only allow to reduce (substract) a fraction of desaturation_vector
-	 */
-	void minimize_saturation(const float *desaturation_vector, float *outputs, saturation_status &sat_status,
-				 float min_output = 0.f, float max_output = 1.f, bool reduce_only = false) const;
-
-	/**
-	 * Mix roll, pitch, yaw, thrust and set the outputs vector.
-	 *
-	 * Desaturation behavior: airmode for roll/pitch:
-	 * thrust is increased/decreased as much as required to meet the demanded roll/pitch.
-	 * Yaw is not allowed to increase the thrust, @see mix_yaw() for the exact behavior.
-	 */
-	inline void mix_airmode_rp(float roll, float pitch, float yaw, float thrust, float *outputs);
-
-	/**
-	 * Mix roll, pitch, yaw, thrust and set the outputs vector.
-	 *
-	 * Desaturation behavior: full airmode for roll/pitch/yaw:
-	 * thrust is increased/decreased as much as required to meet demanded the roll/pitch/yaw,
-	 * while giving priority to roll and pitch over yaw.
-	 */
-	inline void mix_airmode_rpy(float roll, float pitch, float yaw, float thrust, float *outputs);
-
-	/**
-	 * Mix roll, pitch, yaw, thrust and set the outputs vector.
-	 *
-	 * Desaturation behavior: no airmode, thrust is NEVER increased to meet the demanded
-	 * roll/pitch/yaw. Instead roll/pitch/yaw is reduced as much as needed.
-	 * Thrust can be reduced to unsaturate the upper side.
-	 * @see mix_yaw() for the exact yaw behavior.
-	 */
-	inline void mix_airmode_disabled(float roll, float pitch, float yaw, float thrust, float *outputs);
-
-	/**
-	 * Mix yaw by updating an existing output vector (that already contains roll/pitch/thrust).
-	 *
-	 * Desaturation behavior: thrust is allowed to be decreased up to 15% in order to allow
-	 * some yaw control on the upper end. On the lower end thrust will never be increased,
-	 * but yaw is decreased as much as required.
-	 *
-	 * @param yaw demanded yaw
-	 * @param outputs output vector that is updated
-	 */
-	inline void mix_yaw(float yaw, float *outputs);
-
-	void update_saturation_status(unsigned index, bool clipping_high, bool clipping_low_roll_pitch, bool clipping_low_yaw);
 
 	float				_roll_scale{1.0f};
 	float				_pitch_scale{1.0f};
@@ -299,16 +218,10 @@ private:
 	unsigned			_rotor_count;
 	const Rotor			*_rotors;
 
-    MultirotorStructure _structure = {.r1=0.22f,
-                                      .r2=0.13f,
-                                      .nu=0.000806428,
-                                      .mu=8.54858e-06};
-//    EscParams _esc = {.min=1000.0f,
-//                      .max=2000.0f
-//                     };
-
-    SimParams _sim = {.a=1000.0f,
-                      .b=100.0f};
+    MultirotorStructure _structure = {.arm_angle={1.04f, 2.1f, 4.18f, 5.25f},
+                                      .arm_length=0.255f,
+                                      .tau_lift=8.54858e-06,
+                                      .tau_drag=1e-06};
 
 
 	float 				*_outputs_prev{nullptr};
