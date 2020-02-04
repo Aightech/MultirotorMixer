@@ -125,6 +125,7 @@ MultirotorMixer::from_text(Mixer::ControlCallback control_cb, uintptr_t cb_handl
 		debug("multirotor parse failed on '%s'", buf);
 		return nullptr;
 	}
+    debug("R: %s %d %d %d %d",geomname, s[0], s[1], s[2], s[3]);
 
 	if (used > (int)buflen) {
 		debug("OVERFLOW: multirotor spec used %d of %u", used, buflen);
@@ -189,17 +190,41 @@ MultirotorMixer::set_structure_params(){
 }
 
 void
-MultirotorMixer::compute_rotor_speed(float roll, float pitch, float yaw, float thrust, float *outputs)
+MultirotorMixer::compute_rotor_speed(float roll, float pitch, float yaw, float thrust, float *outputs, int& n)
 {
-    matrix::Matrix<float, _MULTIROTOR_COUNT_, 1> Y;
-    float arr_x[4] = {thrust*1.5f*9.81f/0.55f, roll*10, pitch*10, yaw};
-    matrix::Matrix<float, 4, 1> X(arr_x);
-    //X=DY
-    Y = _structure.Dinv * X;
+    //if the iteration is too long, abort and put no speed ...
+    if(n++<10)
+    {
+        matrix::Matrix<float, _MULTIROTOR_COUNT_, 1> Y;
+        float arr_x[4] = {thrust*1.5f*9.81f/0.55f, roll*10, pitch*10, yaw};
+        matrix::Matrix<float, 4, 1> X(arr_x);
+        //X=DY
+        Y = _structure.Dinv * X;
 
-    int arr[4] = {0,2,3,1};
-    for(unsigned i =0; i < _rotor_count; i++)
-        outputs[i] = (Y(arr[i],0)>0)?sqrt(Y(arr[i],0)):0;
+        for(unsigned i =0; i < _rotor_count; i++)
+        {
+            //normale case
+            if(Y(_structure.lookup_table[i],0)>0 && Y(_structure.lookup_table[i],0)< 1000)
+                outputs[i] = sqrt(Y(_structure.lookup_table[i],0));
+
+            // maybe not enough thrust so try the same torque with higher thrust
+            else if(Y(_structure.lookup_table[i],0)<0)
+            {
+                compute_rotor_speed(roll, pitch, yaw, thrust*1.1f, outputs,n);
+                return;
+            }
+
+            // maybe too mmuch thrust so try the same torque with lower thrust
+            else
+            {
+                compute_rotor_speed(roll, pitch, yaw, thrust*0.9f, outputs,n);
+                return;
+            }
+        }
+    }
+    else
+        for(unsigned i =0; i < _rotor_count; i++)
+            outputs[i] = 0;
 }
 
 void
@@ -224,7 +249,8 @@ MultirotorMixer::mix(float *outputs, unsigned space)
     // clean out class variable used to capture saturation
     _saturation_status.value = 0;
 
-    compute_rotor_speed(roll, pitch, yaw, thrust, outputs);
+    int n=0;
+    compute_rotor_speed(roll, pitch, yaw, thrust, outputs,n);
     //debug("r:%f \t p:%f \t y:%f \t t:%f \t %f \t %f \t %f \t %f", double(roll), double(pitch), double(yaw), double(thrust), double(outputs[0]), double(outputs[1]), double(outputs[2]), double(outputs[3]));
     compute_outputs(outputs);
 

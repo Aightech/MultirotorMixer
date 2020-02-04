@@ -70,8 +70,9 @@ public:
 	};
 
     struct MultirotorStructure {
-        float arm_angle[_MULTIROTOR_COUNT_]; //rotor-center distace /x
-        float arm_length; //rotor-center distace /y
+        float arm_angle[_MULTIROTOR_COUNT_]; //arm angle in direct sens
+        float arm_length; //arm length
+        int lookup_table[_MULTIROTOR_COUNT_];
         float tau_lift;
         float tau_drag;
         matrix::Matrix<float,4,_MULTIROTOR_COUNT_> D;
@@ -191,7 +192,7 @@ protected:
      * Mix roll, pitch, yaw, thrust and set the outputs vector.
      *
      */
-    void compute_rotor_speed(float roll, float pitch, float yaw, float thrust, float *outputs);
+    void compute_rotor_speed(float roll, float pitch, float yaw, float thrust, float *outputs, int& n);
     void compute_outputs(float *outputs);
     //void compute_pwm_motors(float* W, float* W_pwm, float offset); // faudrait ajouter des
 
@@ -220,6 +221,7 @@ private:
 
     MultirotorStructure _structure = {.arm_angle={1.04f, 2.1f, 4.18f, 5.25f},
                                       .arm_length=0.255f,
+                                      .lookup_table={0, 2, 3, 1},
                                       .tau_lift=8.54858e-06,
                                       .tau_drag=1e-06};
 
