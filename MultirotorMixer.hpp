@@ -75,11 +75,13 @@ public:
         int lookup_table[_MULTIROTOR_COUNT_];
         float tau_lift;
         float tau_drag;
-        matrix::Matrix<float,4,_MULTIROTOR_COUNT_> D;
-        matrix::Matrix<float,_MULTIROTOR_COUNT_,4> Dinv;
 
         float min_speed;
         float max_speed;
+
+        matrix::Matrix<float,4,_MULTIROTOR_COUNT_> D;
+        matrix::Matrix<float,_MULTIROTOR_COUNT_,4> Dinv;
+
     };
 
 

@@ -229,6 +229,9 @@ MultirotorMixer::compute_rotor_speed(float roll, float pitch, float yaw, float t
                     d -= arr_x[j]*_structure.Dinv(_structure.lookup_table[i],j);
                 arr_x[0] = d/_structure.Dinv(_structure.lookup_table[i],0);
 
+
+                debug("oups");
+
                 // recompute the adequate rotation speed
                 return compute_rotor_speed(roll, pitch, yaw, arr_x[0], outputs,true,n-1);
             }
