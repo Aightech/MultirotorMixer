@@ -77,6 +77,9 @@ public:
         float tau_drag;
         matrix::Matrix<float,4,_MULTIROTOR_COUNT_> D;
         matrix::Matrix<float,_MULTIROTOR_COUNT_,4> Dinv;
+
+        float min_speed;
+        float max_speed;
     };
 
 
@@ -189,10 +192,24 @@ public:
 
 protected:
     /**
-     * Mix roll, pitch, yaw, thrust and set the outputs vector.
+     * @brief Compute the rotor speed from the desired torque and thrust command(in SI unit) and store them in outputs.
      *
+     * @param roll   Roll torque command (N.m)
+     * @param pitch  Pitch torque command (N.m)
+     * @param yaw    Yaw torque command (N.m)
+     * @param thrust Thrust torque command (N)
+     * @param roll Roll torque command (N.m)
+     * @param outputs Motors speed (rad/s)
+     * @param safe Bool to recompute or not in case of motor speed limit reached. If set, in case of limit reached, the thrust is recompute in order to keep each motor speed in their limits, the torque are not recomputed.
+     * @param n Number of iteration allowed for the safe recomputation. If reached the function return false.
+     * @return	Returns true if a solution was found in the number of iteration allowed(n), Otherwise it returns false.
      */
-    void compute_rotor_speed(float roll, float pitch, float yaw, float thrust, float *outputs, int& n);
+    bool compute_rotor_speed(float roll, float pitch, float yaw, float thrust, float *outputs, bool safe=true, int n=10);
+
+    /**
+     * @brief Apply linear coeficient to each motor speed to pass from rad/sec to px4 rotation coef...
+     * @param outputs Motors speed (rad/s)
+     */
     void compute_outputs(float *outputs);
     //void compute_pwm_motors(float* W, float* W_pwm, float offset); // faudrait ajouter des
 
@@ -217,13 +234,22 @@ private:
 	saturation_status		_saturation_status{};
 
 	unsigned			_rotor_count;
-	const Rotor			*_rotors;
+    const Rotor			*_rotors;
 
+    //coeficient to get approximate SI unit for the torque and thrust control command
+    Rotor               _dynamic = {.roll_scale=2,
+                                    .pitch_scale=2,
+                                    .yaw_scale=1,
+                                    .thrust_scale=1.5f*9.81f/0.55f};
+
+    //this structure describe the drone structue to comute its allocation matrix
     MultirotorStructure _structure = {.arm_angle={1.04f, 2.1f, 4.18f, 5.25f},
                                       .arm_length=0.255f,
                                       .lookup_table={0, 2, 3, 1},
                                       .tau_lift=8.54858e-06,
-                                      .tau_drag=1e-06};
+                                      .tau_drag=1e-06,
+                                      .min_speed=1,
+                                      .max_speed=1200};
 
 
 	float 				*_outputs_prev{nullptr};

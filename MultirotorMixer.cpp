@@ -44,6 +44,7 @@
 #include <cstdio>
 
 
+
 #ifdef MIXER_MULTIROTOR_USE_MOCK_GEOMETRY
 enum class MultirotorGeometry : MultirotorGeometryUnderlyingType {
 	QUAD_X,
@@ -169,8 +170,13 @@ MultirotorMixer::from_text(Mixer::ControlCallback control_cb, uintptr_t cb_handl
 
 
 void
-MultirotorMixer::set_structure_params(){
-
+MultirotorMixer::set_structure_params()
+{
+    // Allocation Matrix(4*n) setup
+    //     |        tau_l           tau_l           tau_l    ...       tau_l      |
+    // D = | -l*tau_l*sin_t1 -l*tau_l*sin_t2 -l*tau_l*sin_t3 ... -l*tau_l*sin_tn  |
+    //     |  l*tau_l*cos_t1  l*tau_l*cos_t2  l*tau_l*cos_t3 ...  l*tau_l*cos_tn  |
+    //     |        tau_d          -tau_d           tau_d    ... (-1)^(n+1)*tau_d |
     for(int i =0; i<4; i++)
     {
         _structure.D(0,i) = _structure.tau_lift;
@@ -178,58 +184,69 @@ MultirotorMixer::set_structure_params(){
         _structure.D(2,i) = _structure.tau_lift*_structure.arm_length*cos(_structure.arm_angle[i]);
         _structure.D(3,i) = _structure.tau_drag*(1-(2*(i%2)));
     }
-    debug("%f",double(_structure.tau_drag));
 
+    // X = ( thrust roll_torque pitch_torque yaw_torque )^t
+    // Y = ( w1  w2  w3 ... wn )^t
+    //
+    // X = D*Y
     // => Y = (D^t.D)^-1.D^t * X
-    int precision_helper = 1000;
+    int precision_helper = 1000;//avoid exceeding float precision
     _structure.Dinv = matrix::inv<float,_MULTIROTOR_COUNT_>(_structure.D.T()*precision_helper*_structure.D*precision_helper)*_structure.D.T()*precision_helper*precision_helper;
 
-
+    // linear parameter to pass from rad/sec to px4 rotation coef...
     _A_speed =  1.0f/500.0f;
     _B_speed = -60.0f/50.0f;
 }
 
-void
-MultirotorMixer::compute_rotor_speed(float roll, float pitch, float yaw, float thrust, float *outputs, int& n)
+bool
+MultirotorMixer::compute_rotor_speed(float roll, float pitch, float yaw, float thrust, float *outputs, bool safe, int n)
 {
     //if the iteration is too long, abort and put no speed ...
-    if(n++<10)
+    if(n>0 || !safe)
     {
         matrix::Matrix<float, _MULTIROTOR_COUNT_, 1> Y;
-        float arr_x[4] = {thrust*1.5f*9.81f/0.55f, roll*10, pitch*10, yaw};
+        float arr_x[4] = {thrust, roll, pitch, yaw};
         matrix::Matrix<float, 4, 1> X(arr_x);
         //X=DY
         Y = _structure.Dinv * X;
 
         for(unsigned i =0; i < _rotor_count; i++)
         {
+
             //normale case
-            if(Y(_structure.lookup_table[i],0)>0 && Y(_structure.lookup_table[i],0)< 1000)
+            if(!safe || (Y(_structure.lookup_table[i],0)>_structure.min_speed-2 && Y(_structure.lookup_table[i],0)< _structure.max_speed*_structure.max_speed+2))
                 outputs[i] = sqrt(Y(_structure.lookup_table[i],0));
-
-            // maybe not enough thrust so try the same torque with higher thrust
-            else if(Y(_structure.lookup_table[i],0)<0)
-            {
-                compute_rotor_speed(roll, pitch, yaw, thrust*1.1f, outputs,n);
-                return;
-            }
-
-            // maybe too mmuch thrust so try the same torque with lower thrust
             else
-            {
-                compute_rotor_speed(roll, pitch, yaw, thrust*0.9f, outputs,n);
-                return;
+            { // maybe not enough or too much thrust so apply the require thrust to reach the output limit
+                float d;
+                if(Y(_structure.lookup_table[i],0)<0)
+                    d = _structure.min_speed;//min rotation speed
+                else
+                    d = _structure.max_speed*_structure.max_speed;//max_rotation speed
+
+                //compute the require thrust
+                for(unsigned j = 1; j < 4; j++)
+                    d -= arr_x[j]*_structure.Dinv(_structure.lookup_table[i],j);
+                arr_x[0] = d/_structure.Dinv(_structure.lookup_table[i],0);
+
+                // recompute the adequate rotation speed
+                return compute_rotor_speed(roll, pitch, yaw, arr_x[0], outputs,true,n-1);
             }
         }
+        return true;
     }
     else
+    {
         for(unsigned i =0; i < _rotor_count; i++)
             outputs[i] = 0;
+        //debug("Couldn't find solution");
+        return false;
+    }
 }
-
 void
 MultirotorMixer::compute_outputs(float *outputs)
 {
+    //apply the linear transformation to each motor output
     for(unsigned i =0; i < _rotor_count; i++)
         outputs[i] = _A_speed*outputs[i]+ _B_speed;
 }
@@ -241,21 +258,24 @@ MultirotorMixer::mix(float *outputs, unsigned space)
 		return 0;
     }
 
-    float roll    = math::constrain(get_control(0, 0) * _roll_scale, -1.0f, 1.0f);
-    float pitch   = math::constrain(get_control(0, 1) * _pitch_scale, -1.0f, 1.0f);
-    float yaw     = math::constrain(get_control(0, 2) * _yaw_scale, -1.0f, 1.0f);
-    float thrust  = math::constrain(get_control(0, 3), 0.0f, 1.0f);
+    //get the controle and scale it to get approximated SI units
+    float roll    = _dynamic.roll_scale   * math::constrain(get_control(0, 0) * _roll_scale, -1.0f, 1.0f);
+    float pitch   = _dynamic.pitch_scale  * math::constrain(get_control(0, 1) * _pitch_scale, -1.0f, 1.0f);
+    float yaw     = _dynamic.yaw_scale    * math::constrain(get_control(0, 2) * _yaw_scale, -1.0f, 1.0f);
+    float thrust  = _dynamic.thrust_scale * math::constrain(get_control(0, 3), 0.0f, 1.0f);
 
     // clean out class variable used to capture saturation
     _saturation_status.value = 0;
 
-    int n=0;
-    compute_rotor_speed(roll, pitch, yaw, thrust, outputs,n);
+    //compute the rotor speed, with safe constraint first and without if safe doesn't work
+    if(!compute_rotor_speed(roll, pitch, yaw, thrust, outputs))
+        compute_rotor_speed(roll, pitch, yaw, thrust, outputs,false);
+
     //debug("r:%f \t p:%f \t y:%f \t t:%f \t %f \t %f \t %f \t %f", double(roll), double(pitch), double(yaw), double(thrust), double(outputs[0]), double(outputs[1]), double(outputs[2]), double(outputs[3]));
     compute_outputs(outputs);
 
-	// this will force the caller of the mixer to always supply new slew rate values, otherwise no slew rate limiting will happen
-	_delta_out_max = 0.0f;
+    // this will force the caller of the mixer to always supply new slew rate values, otherwise no slew rate limiting will happen
+    _delta_out_max = 0.0f;
 
 	return _rotor_count;
 }
