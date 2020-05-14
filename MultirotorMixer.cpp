@@ -180,8 +180,8 @@ MultirotorMixer::set_structure_params()
     for(int i =0; i<4; i++)
     {
         _structure.D(0,i) = _structure.tau_lift;
-        _structure.D(1,i) = - _structure.tau_lift*_structure.arm_length*sin(_structure.arm_angle[i]);
-        _structure.D(2,i) = _structure.tau_lift*_structure.arm_length*cos(_structure.arm_angle[i]);
+        _structure.D(1,i) = - _structure.tau_lift*_structure.arm_length*float(sin(_structure.arm_angle[i]));
+        _structure.D(2,i) = _structure.tau_lift*_structure.arm_length*float(cos(_structure.arm_angle[i]));
         _structure.D(3,i) = _structure.tau_drag*(1-(2*(i%2)));
     }
 
