@@ -95,11 +95,14 @@ MultirotorMixer::MultirotorMixer(ControlCallback control_cb, uintptr_t cb_handle
 	_rotor_count(rotor_count),
 	_rotors(rotors),
 	_outputs_prev(new float[_rotor_count]),
-	_tmp_array(new float[_rotor_count])
+    _tmp_array(new float[_rotor_count])
 {
 	for (unsigned i = 0; i < _rotor_count; ++i) {
 		_outputs_prev[i] = _idle_speed;
 	}
+
+
+
     set_structure_params();
 }
 
@@ -172,26 +175,41 @@ MultirotorMixer::from_text(Mixer::ControlCallback control_cb, uintptr_t cb_handl
 void
 MultirotorMixer::set_structure_params()
 {
-    // Allocation Matrix(4*n) setup
-    //     |        tau_l           tau_l           tau_l    ...       tau_l      |
-    // D = | -l*tau_l*sin_t1 -l*tau_l*sin_t2 -l*tau_l*sin_t3 ... -l*tau_l*sin_tn  |
-    //     |  l*tau_l*cos_t1  l*tau_l*cos_t2  l*tau_l*cos_t3 ...  l*tau_l*cos_tn  |
-    //     |        tau_d          -tau_d           tau_d    ... (-1)^(n+1)*tau_d |
-    for(int i =0; i<4; i++)
+//    // Allocation Matrix(4*n) setup
+//    //     |        tau_l           tau_l           tau_l    ...       tau_l      |
+//    // D = | -l*tau_l*sin_t1 -l*tau_l*sin_t2 -l*tau_l*sin_t3 ... -l*tau_l*sin_tn  |
+//    //     |  l*tau_l*cos_t1  l*tau_l*cos_t2  l*tau_l*cos_t3 ...  l*tau_l*cos_tn  |
+//    //     |        tau_d          -tau_d           tau_d    ... (-1)^(n+1)*tau_d |
+    double alloc_mat[4*_rotor_count];
+    for(int j =0; j<(int)_rotor_count; j++)
     {
-        _structure.D(0,i) = _structure.tau_lift;
-        _structure.D(1,i) = - _structure.tau_lift*_structure.arm_length*float(sin(_structure.arm_angle[i]));
-        _structure.D(2,i) = _structure.tau_lift*_structure.arm_length*float(cos(_structure.arm_angle[i]));
-        _structure.D(3,i) = _structure.tau_drag*(1-(2*(i%2)));
+        alloc_mat[0*_rotor_count+j] = _structure.tau_lift;
+        alloc_mat[1*_rotor_count+j] = - _structure.tau_lift*_structure.arm_length*sin(_structure.arm_angle[j]);
+        alloc_mat[2*_rotor_count+j] = _structure.tau_lift*_structure.arm_length*cos(_structure.arm_angle[j]);
+        alloc_mat[3*_rotor_count+j]= _structure.tau_drag*(1-(2*(j%2)));
     }
+
+
 
     // X = ( thrust roll_torque pitch_torque yaw_torque )^t
     // Y = ( w1  w2  w3 ... wn )^t
     //
     // X = D*Y
     // => Y = (D^t.D)^-1.D^t * X
+
+    matrix::Matrix<double,4,_MULTIROTOR_COUNT_> D(alloc_mat);
+    matrix::Matrix<double,_MULTIROTOR_COUNT_,4> Dinv;
+
+
     int precision_helper = 1000;//avoid exceeding float precision
-    _structure.Dinv = matrix::inv<float,_MULTIROTOR_COUNT_>(_structure.D.T()*precision_helper*_structure.D*precision_helper)*_structure.D.T()*precision_helper*precision_helper;
+    Dinv = matrix::inv<double,_MULTIROTOR_COUNT_>(D.T()*precision_helper*D*precision_helper)*D.T()*precision_helper*precision_helper;
+
+
+    for(unsigned i =0; i<_rotor_count; i++)
+        for(int j =0; j<4; j++)
+            _structure.alloc_mat_inv[i*4+j] = Dinv(i,j);
+
+
 
     // linear parameter to pass from rad/sec to px4 rotation coef...
     _A_speed =  1.0f/500.0f;
@@ -204,33 +222,36 @@ MultirotorMixer::compute_rotor_speed(float roll, float pitch, float yaw, float t
     //if the iteration is too long, abort and put no speed ...
     if(n>0 || !safe)
     {
-        matrix::Matrix<float, _MULTIROTOR_COUNT_, 1> Y;
-        float arr_x[4] = {thrust, roll, pitch, yaw};
-        matrix::Matrix<float, 4, 1> X(arr_x);
-        //X=DY
-        Y = _structure.Dinv * X;
+        double arr_x[4] = {thrust, roll, pitch, yaw};
+        double arr_w2[_rotor_count];
+
+        for(unsigned i =0; i<_rotor_count; i++)
+        {
+            arr_w2[i] =0;
+            for(unsigned j =0; j<4; j++)
+                arr_w2[i] += _structure.alloc_mat_inv[i*4 + j]* arr_x[j];
+        }
+
 
         for(unsigned i =0; i < _rotor_count; i++)
         {
 
             //normale case
-            if(!safe || (Y(_structure.lookup_table[i],0)>_structure.min_speed-2 && Y(_structure.lookup_table[i],0)< _structure.max_speed*_structure.max_speed+2))
-                outputs[i] = sqrt(Y(_structure.lookup_table[i],0));
+            if(!safe || (arr_w2[_structure.lookup_table[i]]>_structure.min_speed*_structure.min_speed-2 && arr_w2[_structure.lookup_table[i]]< _structure.max_speed*_structure.max_speed+2))
+                outputs[i] = sqrt(arr_w2[_structure.lookup_table[i]]);
             else
             { // maybe not enough or too much thrust so apply the require thrust to reach the output limit
-                float d;
-                if(Y(_structure.lookup_table[i],0)<0)
+                double d;
+                if(arr_w2[_structure.lookup_table[i]]<0)
                     d = _structure.min_speed;//min rotation speed
                 else
                     d = _structure.max_speed*_structure.max_speed;//max_rotation speed
 
                 //compute the require thrust
                 for(unsigned j = 1; j < 4; j++)
-                    d -= arr_x[j]*_structure.Dinv(_structure.lookup_table[i],j);
-                arr_x[0] = d/_structure.Dinv(_structure.lookup_table[i],0);
+                    d -= _structure.alloc_mat_inv[_structure.lookup_table[i]*4 + j]*arr_x[j];
+                arr_x[0] = d/_structure.alloc_mat_inv[_structure.lookup_table[i]*4];
 
-
-                debug("oups");
 
                 // recompute the adequate rotation speed
                 return compute_rotor_speed(roll, pitch, yaw, arr_x[0], outputs,true,n-1);

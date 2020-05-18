@@ -70,17 +70,17 @@ public:
 	};
 
     struct MultirotorStructure {
-        float arm_angle[_MULTIROTOR_COUNT_]; //arm angle in direct sens
-        float arm_length; //arm length
+        double arm_angle[_MULTIROTOR_COUNT_]; //arm angle in direct sens
+        double arm_length; //arm length
         int lookup_table[_MULTIROTOR_COUNT_];
-        float tau_lift;
-        float tau_drag;
+        double tau_lift;
+        double tau_drag;
 
-        float min_speed;
-        float max_speed;
+        double min_speed;
+        double max_speed;
 
-        matrix::Matrix<float,4,_MULTIROTOR_COUNT_> D;
-        matrix::Matrix<float,_MULTIROTOR_COUNT_,4> Dinv;
+        double alloc_mat[4*_MULTIROTOR_COUNT_];
+        double alloc_mat_inv[4*_MULTIROTOR_COUNT_];
 
     };
 
