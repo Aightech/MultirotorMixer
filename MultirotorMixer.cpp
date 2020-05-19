@@ -180,13 +180,13 @@ MultirotorMixer::set_structure_params()
 //    // D = | -l*tau_l*sin_t1 -l*tau_l*sin_t2 -l*tau_l*sin_t3 ... -l*tau_l*sin_tn  |
 //    //     |  l*tau_l*cos_t1  l*tau_l*cos_t2  l*tau_l*cos_t3 ...  l*tau_l*cos_tn  |
 //    //     |        tau_d          -tau_d           tau_d    ... (-1)^(n+1)*tau_d |
-    double alloc_mat[4*_rotor_count];
+    double alloc_mat[3*_rotor_count];
     for(int j =0; j<(int)_rotor_count; j++)
     {
         alloc_mat[0*_rotor_count+j] = _structure.tau_lift;
         alloc_mat[1*_rotor_count+j] = - _structure.tau_lift*_structure.arm_length*sin(_structure.arm_angle[j]);
         alloc_mat[2*_rotor_count+j] = _structure.tau_lift*_structure.arm_length*cos(_structure.arm_angle[j]);
-        alloc_mat[3*_rotor_count+j]= _structure.tau_drag*(1-(2*(j%2)));
+        //alloc_mat[3*_rotor_count+j]= _structure.tau_drag*(1-(2*(j%2)));
     }
 
 
@@ -197,7 +197,7 @@ MultirotorMixer::set_structure_params()
     // X = D*Y
     // => Y = (D^t.D)^-1.D^t * X
 
-    matrix::Matrix<double,4,_MULTIROTOR_COUNT_> D(alloc_mat);
+    matrix::Matrix<double,3,_MULTIROTOR_COUNT_> D(alloc_mat);
     matrix::Matrix<double,_MULTIROTOR_COUNT_,4> Dinv;
 
 
@@ -222,7 +222,7 @@ MultirotorMixer::compute_rotor_speed(float roll, float pitch, float yaw, float t
     //if the iteration is too long, abort and put no speed ...
     if(n>0 || !safe)
     {
-        double arr_x[4] = {thrust, roll, pitch, yaw};
+        double arr_x[3] = {thrust, roll, pitch};
         double arr_w2[_rotor_count];
 
         for(unsigned i =0; i<_rotor_count; i++)
@@ -257,6 +257,19 @@ MultirotorMixer::compute_rotor_speed(float roll, float pitch, float yaw, float t
                 return compute_rotor_speed(roll, pitch, yaw, arr_x[0], outputs,true,n-1);
             }
         }
+        //delta
+        double delta_D = yaw;
+        for(int i =0; i<(int)_rotor_count; i++)
+            delta_D -= _structure.tau_drag*(1-(2*(i%2)))*arr_w2[i];
+        double div = 0;
+        for(int i =0; i<(int)_rotor_count; i++)
+            div += (1-(2*(i/2)))*sintheta[i]*arr_w2[i];
+        div*=_structure.arm_length*_structure.tau_lift;
+        delta_D /= div;
+
+        for(int i =0; i<4; i++)
+            outputs[4+i] = (1-(2*(i/2)))*delta_D;
+
         return true;
     }
     else
