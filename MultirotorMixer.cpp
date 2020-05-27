@@ -102,6 +102,7 @@ MultirotorMixer::MultirotorMixer(ControlCallback control_cb, uintptr_t cb_handle
     for (unsigned i = 0; i < _rotor_count; ++i) {
         _outputs_prev[i] = _idle_speed;
     }
+    debug("count %d", _rotor_count);
 }
 
 MultirotorMixer::~MultirotorMixer()
@@ -382,10 +383,17 @@ MultirotorMixer::mix(float *outputs, unsigned space)
         }
 
         //outputs[i] = math::constrain(_idle_speed + (outputs[i] * (1.0f - _idle_speed)), _idle_speed, 1.0f);
-        outputs[i] = _A_speed*sqrt(outputs[i])+ _B_speed;
+        //outputs[i] = (i==1)?outputs[i]:0;
+
+        outputs[i] =sqrt(outputs[i]);
+
     }
 
-    //debug("r:%f \t p:%f \t y:%f \t t:%f \t %f \t %f \t %f \t %f", double(roll), double(pitch), double(yaw), double(thrust), double(outputs[0]), double(outputs[1]), double(outputs[2]), double(outputs[3]));
+    //debug("r:%f \t p:%f \t y:%f \t t:%f \t %f \t %f \t %f \t %f\t %f \t %f", double(roll), double(pitch), double(yaw), double(thrust), double(outputs[0]), double(outputs[1]), double(outputs[2]), double(outputs[3]), double(outputs[4]), double(outputs[5]));
+    for (unsigned i = 0; i < _rotor_count; i++)
+        outputs[i] = _A_speed*outputs[i]+ _B_speed;
+    //debug("r:%f \t p:%f \t y:%f \t t:%f \t %f \t %f \t %f \t %f\t %f \t %f", double(roll), double(pitch), double(yaw), double(thrust), double(outputs[0]), double(outputs[1]), double(outputs[2]), double(outputs[3]), double(outputs[4]), double(outputs[5]));
+
 
 //    // Slew rate limiting and saturation checking
 //    for (unsigned i = 0; i < _rotor_count; i++) {

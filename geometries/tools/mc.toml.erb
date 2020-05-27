@@ -1,0 +1,52 @@
+<%
+# Geometry
+
+nb_rotor=6
+
+const_ang=true
+rotor_ang_offset=Math::PI/6
+rotor_angles=[0,1,2,3,4,5]
+
+arm_length=0.25
+
+#<!--
+############# MACRO ANGLE  ##############
+def a_to_s(arr)
+arr[0].round(2).to_s + ', ' + arr[1].round(2).to_s + ', ' + arr[2].round(2).to_s 
+end
+##########################################
+#-->
+
+%>
+
+# Generic multicopter configuration
+
+[info]
+key = "6xp"
+description = "mc"
+
+[rotor_default]
+axis      = [0.0, 0.0, -1.0]
+Ct        = 8.54858e-06
+Cm        = 0.05
+<% (0..nb_rotor-1).each do |index| %>
+<% 	
+	theta = rotor_ang_offset+ Math::PI*2/nb_rotor*index
+	if const_ang == false
+		theta=rotor_angles[index]
+	end
+	pos_rotor = [
+		arm_length*Math.cos(theta),
+		arm_length*Math.sin(theta),
+		0.0]
+	rotor_name = "rotor_" + index.to_s
+	dir = "CCW"
+	if (index-(index/2)*2)*2-1 == -1
+		dir = "CW"
+	end	
+%>
+[[rotors]]
+name      = "<%= rotor_name %>"
+position  = [<%= a_to_s(pos_rotor) %>]
+direction = "<%= dir %>"
+<% end %>

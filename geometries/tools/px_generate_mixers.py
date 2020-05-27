@@ -73,6 +73,7 @@ def parse_geometry_toml(filename):
 
     # Load toml file
     d = toml.load(filename)
+    
 
     # Check info section
     if 'info' not in d:
@@ -350,7 +351,7 @@ if __name__ == '__main__':
         # Add to list
         geometries_list.append(geometry)
 
-        if True:#args.verbose:
+        if args.verbose:
             print('\nFilename')
             print(filename)
             print('\nGeometry')
