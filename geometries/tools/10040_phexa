@@ -1,0 +1,11 @@
+#!/bin/sh
+#
+# @name perso hexa SITL
+#
+# @type hexa x
+#
+
+sh /etc/init.d/rc.mc_defaults
+set MAV_TYPE 13
+set MIXER phexa
+
