@@ -16,6 +16,20 @@ git clone git@github.com:Aightech/MultirotorMixer.git
 
 
 # New config
+## Esay Multicopter
+```bash
+cd ~/src/Firmware/src/lib/mixer/MultirotorMixer/geometries/tools
+```
+Open the file called mc_param.erb and customize the multicopter parameters.
+Then launch the generate_model script with the name of your model and a free ID
+```bash
+./generate_model phexa 10040 
+```
+Now you can run the gazebo simulation:
+```bash
+cd ~/src/Firmware/
+make px4_sitl gazebo_phexa
+```
 
 ## Files
 - [ ] [*Model*](#Model) (Tools/sitl_gazebo/models/ .config & .sdf)
@@ -153,4 +167,8 @@ In the file mc_param.erb you can set the parmeters of your multcopter.
 ```bash
 (cat mc_param.erb && cat functions.erb && cat mc.toml.erb) | erb -T 1 > ~/src/Firmware/src/lib/mixer/MultirotorMixer/geometries/phexa.toml
 ```
+
+# Rotor speed computation explanation
+![doc 1](docs/px4_doc1.png)
+![doc 2](docs/px4_doc2.png)
 
