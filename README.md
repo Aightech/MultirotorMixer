@@ -123,18 +123,21 @@ direction = "CCW"
 ```
 
 # ERB
-In the folder ERB there are different files you can use to generate .toml and .sdf model for parametred multirotors
+In the folder geometries/tools directory there are different files you can use to generate .toml and .sdf model for parametred multirotors
 
 ```bash
-cd ~/src/Firmware/src/lib/mixer/MultirotorMixer/ERB
+cd ~/src/Firmware/src/lib/mixer/MultirotorMixer/geometries/tools
 ```
+## Parameters File
+Inn the file mc_param.erb you can set the parmeters of your multcopter.
+
 ## Create .sdf files
 ```bash
-erb mc.sdf.erb > ~/src/Firmware/Tools/sitl_gazebo/models/phexa/phexa.sdf
+(cat mc_param.erb && cat functions.erb && cat mc.sdf.erb) | erb -T 1 > ~/src/Firmware/Tools/sitl_gazebo/models/phexa/phexa.sdf
 ```
 
 ## Create .toml files
 ```bash
-erb mc.toml.erb > ~/src/Firmware/src/lib/mixer/MultirotorMixer/geometries/phexa.toml
+(cat mc_param.erb && cat functions.erb && cat mc.toml.erb) | erb -T 1 > ~/src/Firmware/src/lib/mixer/MultirotorMixer/geometries/phexa.toml
 ```
 
