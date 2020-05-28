@@ -129,7 +129,7 @@ In the folder geometries/tools directory there are different files you can use t
 cd ~/src/Firmware/src/lib/mixer/MultirotorMixer/geometries/tools
 ```
 ## Parameters File
-Inn the file mc_param.erb you can set the parmeters of your multcopter.
+In the file mc_param.erb you can set the parmeters of your multcopter.
 
 ## Create .sdf files
 ```bash
