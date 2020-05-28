@@ -1,5 +1,3 @@
-
-
 # Generic multicopter configuration
 
 [info]
@@ -11,39 +9,33 @@ axis      = [0.0, 0.0, -1.0]
 Ct        = 8.54858e-06
 Cm        = 0.05
 
-
 [[rotors]]
 name      = "rotor_0"
-position  = [0.22, 0.12, 0.0]
+position  = [0.2165, 0.125, 0.0]
 direction = "CW"
-
 
 [[rotors]]
 name      = "rotor_1"
 position  = [0.0, 0.25, 0.0]
 direction = "CCW"
 
-
 [[rotors]]
 name      = "rotor_2"
-position  = [-0.22, 0.13, 0.0]
+position  = [-0.2165, 0.125, 0.0]
 direction = "CW"
-
 
 [[rotors]]
 name      = "rotor_3"
-position  = [-0.22, -0.12, 0.0]
+position  = [-0.2165, -0.125, 0.0]
 direction = "CCW"
-
 
 [[rotors]]
 name      = "rotor_4"
 position  = [0.0, -0.25, 0.0]
 direction = "CW"
 
-
 [[rotors]]
 name      = "rotor_5"
-position  = [0.22, -0.13, 0.0]
+position  = [0.2165, -0.125, 0.0]
 direction = "CCW"
 
