@@ -1,12 +1,15 @@
 # Install
 ## Ubuntu
-### clone PX4 Firmaware
+cd ~/Download
+wget https://raw.githubusercontent.com/PX4/Devguide/v1.9.0/build_scripts/ubuntu_sim_ros_melodic.sh
+sudo chmod +x ubuntu_sim_ros_melodic.sh
+./ubuntu_sim_ros_melodic.sh
+
+
 ### clone custom Multirotor Mixer
-cd ~/src/Firmware/src/lib/mixer/MultirotorMixer
-rm * -rf
-git init
-git remote add origin git@github.com:Aightech/MultirotorMixer.git
-git pull
+cd ~/src/Firmware/src/lib/mixer/
+rm MultirotorMixer/* -rf
+git clone git@github.com:Aightech/MultirotorMixer.git
 
 
 
