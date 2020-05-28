@@ -122,6 +122,12 @@ position  = [0.22, -0.13, 0.0]
 direction = "CCW"
 ```
 
+## Launching Gazebo
+```bash
+cd ~/src/Firmware/
+make px4_sitl gazebo_phexa
+```
+
 # ERB
 In the folder geometries/tools directory there are different files you can use to generate .toml and .sdf model for parametred multirotors
 
