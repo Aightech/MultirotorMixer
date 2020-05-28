@@ -17,6 +17,13 @@ git clone git@github.com:Aightech/MultirotorMixer.git
 
 # New config
 
+## Files
+- [ ] [*Model*](#Model) (Tools/sitl_gazebo/models/ .config & .sdf)
+- [ ] [*Init*](#Init) (ROMFS/px4fmu_common/init.d-posix/ )
+    - [ ] *Init.d* (ROMFS/px4fmu_common/init.d/rc.mc_default)
+    - [ ] [*Mixer*](#Mixer) (ROMFS/px4fmu_common/mixers/)
+        - [ ] [*Geometry*](#Geometry) (/src/lib/mixer/MultirotorMixer/geometries/)
+
 ## Model
 In Tools/sitl_gazebo/models/ create directory with the name of your model (ex:phexa) and add in this directory: 
 - Config file for the metadata of the model (ex: model.config)
