@@ -16,36 +16,16 @@ direction = "CW"
 
 [[rotors]]
 name      = "rotor_1"
-position  = [0.0647, 0.2415, 0.0]
+position  = [-0.125, 0.2165, 0.0]
 direction = "CCW"
 
 [[rotors]]
 name      = "rotor_2"
-position  = [-0.125, 0.2165, 0.0]
-direction = "CW"
-
-[[rotors]]
-name      = "rotor_3"
-position  = [-0.2415, 0.0647, 0.0]
-direction = "CCW"
-
-[[rotors]]
-name      = "rotor_4"
 position  = [-0.2165, -0.125, 0.0]
 direction = "CW"
 
 [[rotors]]
-name      = "rotor_5"
-position  = [-0.0647, -0.2415, 0.0]
-direction = "CCW"
-
-[[rotors]]
-name      = "rotor_6"
+name      = "rotor_3"
 position  = [0.125, -0.2165, 0.0]
-direction = "CW"
-
-[[rotors]]
-name      = "rotor_7"
-position  = [0.2415, -0.0647, 0.0]
 direction = "CCW"
 

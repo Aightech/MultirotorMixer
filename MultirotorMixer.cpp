@@ -87,8 +87,9 @@ MultirotorMixer::MultirotorMixer(ControlCallback control_cb, uintptr_t cb_handle
     _pitch_scale = pitch_scale;
     _yaw_scale = yaw_scale;
     _idle_speed = -1.0f + idle_speed * 2.0f;	/* shift to output range here to avoid runtime calculation */
-    _A_speed =  1.0f/500.0f;
-    _B_speed = -60.0f/50.0f;
+    _A_speed =  2.0f/1000.0f;
+    _B_speed = -1.0f-2*100.0f/1000.0f;
+
 }
 
 MultirotorMixer::MultirotorMixer(ControlCallback control_cb, uintptr_t cb_handle, const Rotor *rotors,
@@ -102,7 +103,6 @@ MultirotorMixer::MultirotorMixer(ControlCallback control_cb, uintptr_t cb_handle
     for (unsigned i = 0; i < _rotor_count; ++i) {
         _outputs_prev[i] = _idle_speed;
     }
-    debug("count %d", _rotor_count);
 }
 
 MultirotorMixer::~MultirotorMixer()
@@ -385,7 +385,7 @@ MultirotorMixer::mix(float *outputs, unsigned space)
         //outputs[i] = math::constrain(_idle_speed + (outputs[i] * (1.0f - _idle_speed)), _idle_speed, 1.0f);
         //outputs[i] = (i==1)?outputs[i]:0;
 
-        outputs[i] =sqrt(outputs[i]);
+        outputs[i] = sqrt(outputs[i]);
 
     }
 
