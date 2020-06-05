@@ -171,4 +171,5 @@ In the file mc_param.erb you can set the parmeters of your multcopter.
 # Rotor speed computation explanation
 ![doc 1](docs/px4.png)
 ![doc 2](docs/drone.png)
+![doc 3](docs/drone2.png)
 
