@@ -23,7 +23,7 @@ cd ~/src/Firmware/src/lib/mixer/MultirotorMixer/geometries/tools
 Open the file called mc_param.erb and customize the multicopter parameters.
 Then launch the generate_model script with the name of your model and a free ID
 ```bash
-./generate_model phexa 10040 
+./generate_mc_model phexa 10040 
 ```
 Now you can run the gazebo simulation:
 ```bash
