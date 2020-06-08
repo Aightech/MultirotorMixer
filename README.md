@@ -18,7 +18,7 @@ git clone git@github.com:Aightech/MultirotorMixer.git
 # New config
 ## Esay Multicopter
 ```bash
-cd ~/src/Firmware/src/lib/mixer/MultirotorMixer/geometries/tools
+cd ~/src/Firmware/src/lib/mixer/MultirotorMixer/geometries/tools/multicopter
 ```
 Open the file called mc_param.erb and customize the multicopter parameters.
 Then launch the generate_model script with the name of your model and a free ID
@@ -50,7 +50,7 @@ In Tools/sitl_gazebo/models/ create directory with the name of your model (ex:ph
   <sdf version='1.4'>phexa.sdf</sdf>
 
   <author>
-   <name>Devillard</name>
+   <name>Devillard</name> 
   </author>
 
   <description>
