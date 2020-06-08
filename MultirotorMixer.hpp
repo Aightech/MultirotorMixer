@@ -255,10 +255,10 @@ private:
     const Rotor			*_rotors;
 
   //coeficient to get approximate SI unit for the torque and thrust control command
-    Rotor               _dynamic = {.roll_scale=2,
-                                    .pitch_scale=2,
+    Rotor               _dynamic = {.roll_scale=100,
+                                    .pitch_scale=100,
                                     .yaw_scale=1,
-                                    .thrust_scale=1.5f*9.81f/0.55f};
+                                    .thrust_scale=8.5f*9.81f/0.55f};
   float               _A_speed;
     float               _B_speed;
 

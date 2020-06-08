@@ -351,7 +351,7 @@ if __name__ == '__main__':
         # Add to list
         geometries_list.append(geometry)
 
-        if args.verbose:
+        if True:#args.verbose:
             print('\nFilename')
             print(filename)
             print('\nGeometry')

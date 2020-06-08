@@ -1,30 +1,31 @@
 # Generic multicopter configuration
 
 [info]
-key = "6xp"
-description = "mc"
+key = "4d"
+description = "indus"
 
 [rotor_default]
 axis      = [0.0, 0.0, -1.0]
-Ct        = 8.54858e-06
-Cm        = 0.06
+Ct        = 0.00011
+Cm        = 0.045
+
 [[rotors]]
 name      = "rotor_0"
-position  = [0.2165, 0.125, 0.0]
-direction = "CW"
+position  = [0.35, 0.475, 0.0]
+direction = "CCW"
 
 [[rotors]]
 name      = "rotor_1"
-position  = [-0.125, 0.2165, 0.0]
+position  = [-0.35, -0.475, 0.0]
 direction = "CCW"
 
 [[rotors]]
 name      = "rotor_2"
-position  = [-0.2165, -0.125, 0.0]
+position  = [0.35, -0.475, 0.0]
 direction = "CW"
 
 [[rotors]]
 name      = "rotor_3"
-position  = [0.125, -0.2165, 0.0]
-direction = "CCW"
+position  = [-0.35, 0.475, 0.0]
+direction = "CW"
 

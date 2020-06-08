@@ -7,7 +7,7 @@ if [ $# -lt 2 ]
 fi
 MODEL_NAME=$1
 MODEL_ID=$2
-cd ../../../../../..
+cd ../../../../../../..
 firmware_dir=`pwd`
 cd -
 
@@ -29,7 +29,7 @@ if grep -Fq "$MODEL_NAME" ${firmware_dir}/platforms/posix/cmake/sitl_target.cmak
 then
     echo "[INFO] Model already included in ${firmware_dir}/platforms/posix/cmake/sitl_target.cmake)"
 else
-    sed "/set(models none /a \\\t$MODEL_NAME" ${firmware_dir}/platforms/posix/cmake/sitl_target.cmake
+    sed -i "/set(models none /a \\\t$MODEL_NAME" ${firmware_dir}/platforms/posix/cmake/sitl_target.cmake
     echo "[INFO] Model included in ${firmware_dir}/platforms/posix/cmake/sitl_target.cmake)"
 fi
 
@@ -42,9 +42,18 @@ echo "[INFO] Init file created. (${firmware_dir}/ROMFS/px4fmu_common/init.d-posi
 echo "[INFO] mixer file created. (${firmware_dir}/ROMFS/px4fmu_common/mixers/$MODEL_NAME.main.mix)"
 
 # create geometry file
+#ensure the model is include in cmake file
+if grep -Fq "$MODEL_NAME.toml" ${firmware_dir}/src/lib/mixer/MultirotorMixer/CMakeLists.txt
+then
+    echo "[INFO] Model already included in ${firmware_dir}/src/lib/mixer/MultirotorMixer/CMakeLists.txt"
+else
+    sed -i "/set(geometry_files/a \\\t$MODEL_NAME.toml" ${firmware_dir}/src/lib/mixer/MultirotorMixer/CMakeLists.txt
+    echo "[INFO] Model included in ${firmware_dir}/src/lib/mixer/MultirotorMixer/CMakeLists.txt"
+fi
+
 (cat mc_param.erb && cat functions.erb && cat mc.toml.erb) | erb -T 1 > ${firmware_dir}/src/lib/mixer/MultirotorMixer/geometries/$MODEL_NAME.toml #mixer file
 echo "[INFO] geometry file created. (${firmware_dir}/src/lib/mixer/MultirotorMixer/geometries/$MODEL_NAME.toml)"
-touch  ${firmware_dir}/src/lib/mixer/MultirotorMixer/CMakeList.txt
+touch  ${firmware_dir}/src/lib/mixer/MultirotorMixer/CMakeLists.txt
 
 
 

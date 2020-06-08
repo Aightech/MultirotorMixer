@@ -2,12 +2,14 @@
 
 [info]
 key = "<%= model_key %>"
-description = "mc"
+description = "indus"
 
 [rotor_default]
 axis      = [0.0, 0.0, -1.0]
-Ct        = 8.54858e-06
-Cm        = 0.05
+Ct        = <%= motorConstant.to_s%>
+
+Cm        = <%= momentConstant.to_s%>
+
 
 <% (0..nb_rotor-1).each do |index| %>
 <% 	
@@ -24,6 +26,10 @@ Cm        = 0.05
 	if (index-(index/2)*2)*2-1 == -1
 		dir = "CW"
 	end	
+	
+	if alt_dir == true
+		dir = rotor_dir[index]
+	end
 %>
 [[rotors]]
 name      = "<%= rotor_name %>"

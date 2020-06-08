@@ -33,7 +33,7 @@
 		<% 	
 			theta = -(rotor_ang_offset+ Math::PI*2/nb_rotor*index)
 			if const_ang == false
-				theta=rotor_angles[index]
+				theta=-rotor_angles[index]
 			end
 
 			pos_rotor = [
@@ -84,20 +84,20 @@
 		
 	<plugin name='motor_<%= index.to_s%>_model' filename='libgazebo_motor_model.so'>
 		<robotNamespace/>
-		<jointName>rotor_<%= index.to_s%>_joint</jointName>
-		<linkName>rotor_<%= index.to_s%></linkName>
-		<turningDirection><%= dir %></turningDirection>
-		<timeConstantUp>0.0125</timeConstantUp>
-		<timeConstantDown>0.025</timeConstantDown>
-		<maxRotVelocity>1100</maxRotVelocity>
-		<motorConstant>8.54858e-06</motorConstant>
-		<momentConstant>0.06</momentConstant>
-		<commandSubTopic>/gazebo/command/motor_speed</commandSubTopic>
-		<motorNumber><%= index.to_s%></motorNumber>
-		<rotorDragCoefficient>0.000175</rotorDragCoefficient>
-		<rollingMomentCoefficient>1e-06</rollingMomentCoefficient>
-		<motorSpeedPubTopic>/motor_speed/<%= index.to_s%></motorSpeedPubTopic>
-		<rotorVelocitySlowdownSim>10</rotorVelocitySlowdownSim>
+		<jointName>			rotor_<%= index.to_s%>_joint			</jointName>
+		<linkName>			rotor_<%= index.to_s%>			</linkName>
+		<turningDirection>		<%= dir %>				</turningDirection>
+		<timeConstantUp>		0.0125				</timeConstantUp>
+		<timeConstantDown>		0.025				</timeConstantDown>
+		<maxRotVelocity>		<%= maxRotVelocity.to_s%>				</maxRotVelocity>
+		<motorConstant>		<%= motorConstant.to_s%>			</motorConstant>
+		<momentConstant>		<%= momentConstant.to_s%>				</momentConstant>
+		<commandSubTopic>		/gazebo/command/motor_speed	</commandSubTopic>
+		<motorNumber>			<%= index.to_s%>				</motorNumber>
+		<rotorDragCoefficient>		<%= rotorDragCoefficient.to_s%>			</rotorDragCoefficient>
+		<rollingMomentCoefficient>	<%= rollingMomentCoefficient.to_s%>			</rollingMomentCoefficient>
+		<motorSpeedPubTopic>		/motor_speed/<%= index.to_s%>			</motorSpeedPubTopic>
+		<rotorVelocitySlowdownSim>	10				</rotorVelocitySlowdownSim>
 	</plugin>
 		
 	<% end %>
