@@ -1,4 +1,4 @@
-/****************************************************************************
+﻿/****************************************************************************
  *
  *   Copyright (C) 2012-2019 PX4 Development Team. All rights reserved.
  *
@@ -198,23 +198,6 @@ private:
     void minimize_saturation(const float *desaturation_vector, float *outputs, saturation_status &sat_status,
                  float min_output = 0.f, float max_output = 1.f, bool reduce_only = false) const;
 
-    /**
-     * Mix roll, pitch, yaw, thrust and set the outputs vector.
-     *
-     * Desaturation behavior: airmode for roll/pitch:
-     * thrust is increased/decreased as much as required to meet the demanded roll/pitch.
-     * Yaw is not allowed to increase the thrust, @see mix_yaw() for the exact behavior.
-     */
-    inline void mix_airmode_rp(float roll, float pitch, float yaw, float thrust, float *outputs);
-
-    /**
-     * Mix roll, pitch, yaw, thrust and set the outputs vector.
-     *
-     * Desaturation behavior: full airmode for roll/pitch/yaw:
-     * thrust is increased/decreased as much as required to meet demanded the roll/pitch/yaw,
-     * while giving priority to roll and pitch over yaw.
-     */
-    inline void mix_airmode_rpy(float roll, float pitch, float yaw, float thrust, float *outputs);
 
     /**
      * Mix roll, pitch, yaw, thrust and set the outputs vector.
@@ -224,7 +207,7 @@ private:
      * Thrust can be reduced to unsaturate the upper side.
      * @see mix_yaw() for the exact yaw behavior.
      */
-    inline void mix_airmode_disabled(float roll, float pitch, float yaw, float thrust, float *outputs);
+    inline void mix_airmode_disabled(float roll, float pitch, float yaw, float thrust, float *squared_rotor_spd);
 
     /**
      * Mix yaw by updating an existing output vector (that already contains roll/pitch/thrust).
@@ -238,7 +221,6 @@ private:
      */
     inline void mix_yaw(float yaw, float *outputs);
 
-    void update_saturation_status(unsigned index, bool clipping_high, bool clipping_low_roll_pitch, bool clipping_low_yaw);
 
     float				_roll_scale{1.0f};
     float				_pitch_scale{1.0f};
@@ -254,14 +236,23 @@ private:
     unsigned			_rotor_count;
     const Rotor			*_rotors;
 
-  //coeficient to get approximate SI unit for the torque and thrust control command
-    Rotor               _dynamic = {.roll_scale=100,
-                                    .pitch_scale=100,
-                                    .yaw_scale=1,
-                                    .thrust_scale=8.5f*9.81f/0.55f};
-  float               _A_speed;
-    float               _B_speed;
+    //By aightech: drone mass
+    float _mass = 8.5;
 
+    //By aightech: coefficient to get the torque and thrust control with SI.
+    float _roll_to_SI = 100;
+    float _pitch_to_SI = 100;
+    float _yaw_to_SI = 100;
+    float _thrust_to_SI = _mass*9.81f/0.55f;
+
+    //By aightech: to transform the rotation speed in PWM (depends of the ESC)
+    float _input_offset=0;
+    float _input_scaling=1047;
+    float _zero_position_armed=0;
+    float _A_speed_to_PWM =  2.0f/_input_scaling;
+    float _B_speed_to_PWM = -1.0f-2*_zero_position_armed/_input_scaling - 2*_input_offset;
+
+    //By aightech: Maximum and minimum squred rotation speed of the in rad/s
     float _min_speed2 = 0*0;
     float _max_speed2 = 1200*1200;
 
