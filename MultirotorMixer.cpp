@@ -240,12 +240,12 @@ MultirotorMixer::mix_airmode_disabled(float moment_roll, float moment_pitch, flo
     // Mix without yaw
     for (unsigned i = 0; i < _rotor_count; i++) {
 
-        squared_rotor_spd[i] = moment_roll * _rotors[i].roll_scale +
-                 moment_pitch * _rotors[i].pitch_scale +
-                 thrust * _rotors[i].thrust_scale;
+        squared_rotor_spd[i] = moment_roll * _rotors[i].rotor_roll_allocation_coeff +
+                 moment_pitch * _rotors[i].rotor_pitch_allocation_coeff +
+                 thrust * _rotors[i].thrust_allocation_coeff;
 
         // Thrust will be used to unsaturate if needed
-        _tmp_array[i] = _rotors[i].thrust_scale;
+        _tmp_array[i] = _rotors[i].thrust_allocation_coeff;
     }
 
     // only reduce thrust
@@ -253,13 +253,13 @@ MultirotorMixer::mix_airmode_disabled(float moment_roll, float moment_pitch, flo
 
     // Reduce roll/pitch acceleration if needed to unsaturate
     for (unsigned i = 0; i < _rotor_count; i++) {
-        _tmp_array[i] = _rotors[i].roll_scale;
+        _tmp_array[i] = _rotors[i].rotor_roll_allocation_coeff;
     }
 
     minimize_saturation(_tmp_array, squared_rotor_spd, _saturation_status, _min_speed2, _max_speed2);
 
     for (unsigned i = 0; i < _rotor_count; i++) {
-        _tmp_array[i] = _rotors[i].pitch_scale;
+        _tmp_array[i] = _rotors[i].rotor_pitch_allocation_coeff;
     }
 
     minimize_saturation(_tmp_array, squared_rotor_spd, _saturation_status, _min_speed2, _max_speed2);
@@ -278,10 +278,10 @@ void MultirotorMixer::mix_yaw(float yaw, float *outputs)
 {
     // Add yaw to outputs
     for (unsigned i = 0; i < _rotor_count; i++) {
-        outputs[i] += yaw * _rotors[i].yaw_scale;
+        outputs[i] += yaw * _rotors[i].rotor_yaw_allocation_coeff;
 
         // Yaw will be used to unsaturate if needed
-        _tmp_array[i] = _rotors[i].yaw_scale;
+        _tmp_array[i] = _rotors[i].rotor_yaw_allocation_coeff;
     }
 
     // Change yaw acceleration to unsaturate the outputs if needed (do not change roll/pitch),
@@ -289,7 +289,7 @@ void MultirotorMixer::mix_yaw(float yaw, float *outputs)
     minimize_saturation(_tmp_array, outputs, _saturation_status, _min_speed2, _max_speed2);
 
     for (unsigned i = 0; i < _rotor_count; i++) {
-        _tmp_array[i] = _rotors[i].thrust_scale;
+        _tmp_array[i] = _rotors[i].thrust_allocation_coeff;
     }
 
     // reduce thrust only
@@ -297,11 +297,11 @@ void MultirotorMixer::mix_yaw(float yaw, float *outputs)
 }
 
 unsigned
-MultirotorMixer::mix(float *rotor_pwm, unsigned space)
+MultirotorMixer::mix(float *output_sent_to_driver, unsigned space)
 {
     //By aightech: Only one array is used but for readibility we use different name depending on the process step.
-    float *squared_rotor_spd = rotor_pwm;
-    float *rotor_spd = rotor_pwm;
+    float *squared_rotor_spd = -1.0f;
+    float *rotor_spd = -1.0f;
 
     if (space < _rotor_count) {
         return 0;
@@ -319,29 +319,28 @@ MultirotorMixer::mix(float *rotor_pwm, unsigned space)
     _saturation_status.value = 0;
 
     // Do the mixing using the strategy given by the current Airmode configuration
-    switch (_airmode)
-    {
-        case Airmode::disabled:
-            mix_airmode_disabled(moment_roll, moment_pitch, moment_yaw, thrust, squared_rotor_spd);
-        break;
-        default:
-            debug("unimplement airmod");
-        break;
-    }
+
+    mix_airmode_disabled(torque_roll, torque_pitch, torque_yaw, thrust, squared_rotor_spd);
 
     //By aightech:: root squared the rotor speed.
-    for (unsigned i = 0; i < _rotor_count; i++)
-        rotor_spd[i] = sqrt(squared_rotor_spd[i]);
 
-
-    //debug("r:%f \t p:%f \t y:%f \t t:%f \t %f \t %f \t %f \t %f\t %f \t %f", double(roll), double(pitch), double(yaw), double(thrust), double(rotor_spd[0]), double(rotor_spd[1]), double(rotor_spd[2]), double(rotor_spd[3]), double(rotor_spd[4]), double(rotor_spd[5]));
 
     //By aightech: transform the rotor speed into pwm
+
+    // since driver computes a PWM value which is PWM_final=output_sent_to_driver-pwm_min/(pwm_max-pwm_min)
+    // and rotation speed setpoint sent to the motors is motor_constant*battery*PWM_final:
+    // we have to send to the driver : rotor_spd/motor_constant/battery*(pwm_max-pwm_min)+pwm_min
+
+    // we have to reverse this relation : output_sent_to_driver =
+
     for (unsigned i = 0; i < _rotor_count; i++)
-        rotor_pwm[i] = _A_speed_to_PWM*rotor_spd[i]+ _B_speed_to_PWM;
+        rotor_spd[i] = sqrt(squared_rotor_spd[i]);
+        //debug("r:%f \t p:%f \t y:%f \t t:%f \t %f \t %f \t %f \t %f\t %f \t %f", double(roll), double(pitch), double(yaw), double(thrust), double(rotor_spd[0]), double(rotor_spd[1]), double(rotor_spd[2]), double(rotor_spd[3]), double(rotor_spd[4]), double(rotor_spd[5]));
 
 
-    _delta_out_max = 0.0f;
+        output_sent_to_driver[i] = rotor_spd[i]/motor_constant_in_tr_min_per_volt/battery_level*(PWM_max-PWM_min)+PWM_min;
+
+
 
     return _rotor_count;
 }

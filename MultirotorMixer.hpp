@@ -56,10 +56,10 @@ public:
      * Precalculated rotor mix.
      */
     struct Rotor {
-        float	roll_scale;		/**< scales roll for this rotor */
-        float	pitch_scale;	/**< scales pitch for this rotor */
-        float	yaw_scale;		/**< scales yaw for this rotor */
-        float	thrust_scale;	/**< scales thrust for this rotor */
+        float	rotor_roll_allocation_coeff;		/**< scales roll for this rotor */
+        float	rotor_pitch_allocation_coeff;            /**< scales pitch for this rotor */
+        float	rotor_yaw_allocation_coeff;		/**< scales yaw for this rotor */
+        float	thrust_allocation_coeff;           /**< scales thrust for this rotor */
     };
 
     /**
@@ -133,7 +133,6 @@ public:
      * @param[in]  delta_out_max  Maximum delta output.
      *
      */
-    void 			set_max_delta_out_once(float delta_out_max) override { _delta_out_max = delta_out_max; }
 
     unsigned		set_trim(float trim) override { return _rotor_count; }
     unsigned		get_trim(float *trim) override { return _rotor_count; }
@@ -143,7 +142,6 @@ public:
      *
      * @param[in]  val   The value
      */
-    void			set_thrust_factor(float val) override { _thrust_factor = math::constrain(val, 0.0f, 1.0f); }
 
     void 			set_airmode(Airmode airmode) override { _airmode = airmode; }
 
@@ -222,8 +220,6 @@ private:
     inline void mix_yaw(float yaw, float *outputs);
 
     float				_idle_speed{0.0f};
-    float 				_delta_out_max{0.0f};
-    float 				_thrust_factor{0.0f};
 
     Airmode				_airmode{Airmode::disabled};
 
@@ -233,20 +229,43 @@ private:
     const Rotor			*_rotors;
 
     //By aightech: drone mass
-    float _mass = 8.5;
+    //DACAR
+    //float _mass = 8.5;
+    //Hexacopter
+    float _mass=1.95;
+
 
     //By aightech: coefficient to get the torque and thrust control with SI.
-    float _roll_ctrl_input_to_torque = 100;
-    float _pitch_ctrl_input_to_torque = 100;
-    float _yaw_ctrl_input_to_torque = 100;
-    float _thrust_ctrl_input_to_force = _mass*9.81f/0.55f;
+    // Controls inputs are >-1 and <1, and correspond to the ouput of the attitude PID controller.
+    // A conversion must be performed.
+
+    float _roll_ctrl_input_to_torque = 1;
+    float _pitch_ctrl_input_to_torque = 1;
+    float _yaw_ctrl_input_to_torque = 1;
+    float _thrust_ctrl_input_to_force = 2.0*_mass*9.81f;
+    // when thrust control input is 0.5, the drone is supposed to hover
 
     //By aightech: to transform the rotation speed in PWM (depends of the ESC)
+    // Used in SITL with Gazebo.
+
     float _input_offset=0;
     float _input_scaling=1047;
     float _zero_position_armed=0;
     float _A_speed_to_PWM =  2.0f/_input_scaling;
     float _B_speed_to_PWM = -1.0f-2*_zero_position_armed/_input_scaling - 2*_input_offset;
+
+    // When using real motors.
+
+    //Hexacopter
+    float PWM_min=1000;
+    float PWM_max=2000;
+    float motor_constant_in_tr_min_per_volt=720;//valid for DJI E2312 ESC
+    float battery_level=16.8;
+
+    //DACAR Upcoming
+
+    // in theory the battery level is precompensated in the attitude controller
+
 
     //By aightech: Maximum and minimum squred rotation speed of the in rad/s
     float _min_speed2 = 0*0;
