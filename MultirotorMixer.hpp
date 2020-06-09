@@ -221,10 +221,6 @@ private:
      */
     inline void mix_yaw(float yaw, float *outputs);
 
-
-    float				_roll_scale{1.0f};
-    float				_pitch_scale{1.0f};
-    float				_yaw_scale{1.0f};
     float				_idle_speed{0.0f};
     float 				_delta_out_max{0.0f};
     float 				_thrust_factor{0.0f};
@@ -240,10 +236,10 @@ private:
     float _mass = 8.5;
 
     //By aightech: coefficient to get the torque and thrust control with SI.
-    float _roll_to_SI = 100;
-    float _pitch_to_SI = 100;
-    float _yaw_to_SI = 100;
-    float _thrust_to_SI = _mass*9.81f/0.55f;
+    float _roll_ctrl_input_to_torque = 100;
+    float _pitch_ctrl_input_to_torque = 100;
+    float _yaw_ctrl_input_to_torque = 100;
+    float _thrust_ctrl_input_to_force = _mass*9.81f/0.55f;
 
     //By aightech: to transform the rotation speed in PWM (depends of the ESC)
     float _input_offset=0;

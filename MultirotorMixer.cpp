@@ -79,13 +79,9 @@ const char *_config_key[] = {"4x"};
 //#include <debug.h>
 //#define debug(fmt, args...)	syslog(fmt "\n", ##args)
 
-MultirotorMixer::MultirotorMixer(ControlCallback control_cb, uintptr_t cb_handle, MultirotorGeometry geometry,
-                 float roll_scale, float pitch_scale, float yaw_scale, float idle_speed) :
+MultirotorMixer::MultirotorMixer(ControlCallback control_cb, uintptr_t cb_handle, MultirotorGeometry geometry,float idle_speed) :
     MultirotorMixer(control_cb, cb_handle, _config_index[(int)geometry], _config_rotor_count[(int)geometry])
 {
-    _roll_scale = roll_scale;
-    _pitch_scale = pitch_scale;
-    _yaw_scale = yaw_scale;
     _idle_speed = -1.0f + idle_speed * 2.0f;	/* shift to output range here to avoid runtime calculation */
 
 }
@@ -312,10 +308,10 @@ MultirotorMixer::mix(float *rotor_pwm, unsigned space)
     }
 
     //By aightech: get the controle and scale it to get approximated SI units
-    float moment_roll    = _roll_to_SI   * math::constrain(get_control(0, 0) * _roll_scale, -1.0f, 1.0f);
-    float moment_pitch   = _pitch_to_SI  * math::constrain(get_control(0, 1) * _pitch_scale, -1.0f, 1.0f);
-    float moment_yaw     = _yaw_to_SI    * math::constrain(get_control(0, 2) * _yaw_scale, -1.0f, 1.0f);
-    float thrust  = _thrust_to_SI  * math::constrain(get_control(0, 3), 0.0f, 1.0f);
+    float torque_roll    = _roll_ctrl_input_to_torque   * math::constrain(get_control(0, 0) , -1.0f, 1.0f);
+    float torque_pitch   = _pitch_ctrl_input_to_torque  * math::constrain(get_control(0, 1) , -1.0f, 1.0f);
+    float torque_yaw     = _yaw_ctrl_input_to_torque    * math::constrain(get_control(0, 2) , -1.0f, 1.0f);
+    float thrust  = _thrust_ctrl_input_to_force  * math::constrain(get_control(0, 3), 0.0f, 1.0f);
 
 
 
