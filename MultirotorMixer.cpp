@@ -339,7 +339,12 @@ MultirotorMixer::mix(float *output_sent_to_driver, unsigned space)
         //debug("r:%f \t p:%f \t y:%f \t t:%f \t %f \t %f \t %f \t %f\t %f \t %f", double(roll), double(pitch), double(yaw), double(thrust), double(rotor_spd[0]), double(rotor_spd[1]), double(rotor_spd[2]), double(rotor_spd[3]), double(rotor_spd[4]), double(rotor_spd[5]));
 
 
-        output_sent_to_driver[i] = rotor_spd[i]/motor_constant_in_tr_min_per_volt/battery_level*(PWM_max-PWM_min)+PWM_min;
+        output_sent_to_driver[i] = math::constrain(rotor_spd[i]/motor_constant_in_tr_min_per_volt/battery_level*(PWM_max-PWM_min)+PWM_min,0.0f,PWM_max*0.95f);
+        //if (std::isnan(output_sent_to_driver[i])){
+        //    output_sent_to_driver[i]=PWM_min*1.05f;
+
+        //}
+        //debug("O:%f",double(output_sent_to_driver[0]));
 
     }
 

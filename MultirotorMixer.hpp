@@ -257,7 +257,7 @@ private:
     float PWM_min=1000.0f;
     float PWM_max=2000.0f;
     float motor_constant_in_tr_min_per_volt=720.0f;//valid for DJI E2312 ESC
-    float battery_level=16.8;
+    float battery_level=16.8f;
 
     //DACAR Upcoming
 
