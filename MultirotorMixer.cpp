@@ -156,10 +156,7 @@ MultirotorMixer::from_text(Mixer::ControlCallback control_cb, uintptr_t cb_handl
                control_cb,
                cb_handle,
                geometry,
-               s[0] / 10000.0f,
-               s[1] / 10000.0f,
-               s[2] / 10000.0f,
-               s[3] / 10000.0f);
+               s[3] / 10000.0f); //corresponds to the last control input, i.e thrust or idle speed
 }
 
 float
@@ -300,8 +297,9 @@ unsigned
 MultirotorMixer::mix(float *output_sent_to_driver, unsigned space)
 {
     //By aightech: Only one array is used but for readibility we use different name depending on the process step.
-    float *squared_rotor_spd = -1.0f;
-    float *rotor_spd = -1.0f;
+
+    float *squared_rotor_spd = output_sent_to_driver;
+    float *rotor_spd = output_sent_to_driver;
 
     if (space < _rotor_count) {
         return 0;
@@ -334,13 +332,16 @@ MultirotorMixer::mix(float *output_sent_to_driver, unsigned space)
     // we have to reverse this relation : output_sent_to_driver =
 
     for (unsigned i = 0; i < _rotor_count; i++)
+    {
+
         rotor_spd[i] = sqrt(squared_rotor_spd[i]);
+
         //debug("r:%f \t p:%f \t y:%f \t t:%f \t %f \t %f \t %f \t %f\t %f \t %f", double(roll), double(pitch), double(yaw), double(thrust), double(rotor_spd[0]), double(rotor_spd[1]), double(rotor_spd[2]), double(rotor_spd[3]), double(rotor_spd[4]), double(rotor_spd[5]));
 
 
         output_sent_to_driver[i] = rotor_spd[i]/motor_constant_in_tr_min_per_volt/battery_level*(PWM_max-PWM_min)+PWM_min;
 
-
+    }
 
     return _rotor_count;
 }
