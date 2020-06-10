@@ -320,19 +320,22 @@ MultirotorMixer::mix(float *output_sent_to_driver, unsigned space)
 
     mix_airmode_disabled(torque_roll, torque_pitch, torque_yaw, thrust, squared_rotor_spd);
 
-    //By aightech:: root squared the rotor speed.
 
 
     //By aightech: transform the rotor speed into pwm
+    // output_sent_to_driver has to be between -1 and 1.
+    //When -1, the duty cycle sent to the motor is 0.
+    //When 0, , the duty cycle sent to the motor is 0.5.
+    //When 1, the duty cycle sent to the motor is 1.
+    // THIS IS WERE WE HAVE CONTROL OVER THE DUTY CYCLE
+    // Then it is processed by the drivers.
 
-    // since driver computes a PWM value which is PWM_final=output_sent_to_driver-pwm_min/(pwm_max-pwm_min)
-    // and rotation speed setpoint sent to the motors is motor_constant*battery*PWM_final:
-    // we have to send to the driver : rotor_spd/motor_constant/battery*(pwm_max-pwm_min)+pwm_min
 
     // we have to reverse this relation : output_sent_to_driver =
 
     for (unsigned i = 0; i < _rotor_count; i++)
     {
+        //By aightech:: root squared the rotor speed.
 
         rotor_spd[i] = sqrt(squared_rotor_spd[i]);
 
