@@ -256,8 +256,8 @@ private:
     //Hexacopter
     float PWM_min=1000.0f;
     float PWM_max=2000.0f;
-    float motor_constant_in_tr_min_per_volt=720.0f;//valid for DJI E2312 ESC
-    float battery_level=16.8f;
+    float motor_constant_in_rad_sec_per_volt=960.0f*2.0f*3.1415f/60.0f;//valid for DJI E2312 ESC
+    float battery_voltage=16.8f;
 
     //DACAR Upcoming
 

@@ -337,12 +337,13 @@ MultirotorMixer::mix(float *output_sent_to_driver, unsigned space)
     {
         //By aightech:: root squared the rotor speed.
 
-        rotor_spd[i] = sqrt(squared_rotor_spd[i]);
+        rotor_spd[i] = sqrt(math::constrain(squared_rotor_spd[i],0.0f,fabsf(squared_rotor_spd[i])));
 
         //debug("r:%f \t p:%f \t y:%f \t t:%f \t %f \t %f \t %f \t %f\t %f \t %f", double(roll), double(pitch), double(yaw), double(thrust), double(rotor_spd[0]), double(rotor_spd[1]), double(rotor_spd[2]), double(rotor_spd[3]), double(rotor_spd[4]), double(rotor_spd[5]));
 
 
-        output_sent_to_driver[i] = math::constrain(rotor_spd[i]/motor_constant_in_tr_min_per_volt/battery_level*(PWM_max-PWM_min)+PWM_min,0.0f,PWM_max*0.95f);
+        output_sent_to_driver[i] = (rotor_spd[i]/motor_constant_in_rad_sec_per_volt/battery_voltage)*2.0f-1.0f;
+        //output_sent_to_driver[i] =  0.0f;
         //if (std::isnan(output_sent_to_driver[i])){
         //    output_sent_to_driver[i]=PWM_min*1.05f;
 
