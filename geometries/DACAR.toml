@@ -1,5 +1,5 @@
 # Generic multicopter configuration
-
+# REAL CT=4.58e-05
 [info]
 key = "4d"
 description = "indus"
