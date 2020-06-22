@@ -32,6 +32,8 @@
 ############################################################################
 
 set(geometry_files
+	pocto.toml
+	pquad.toml
 	dodeca_bottom_cox.toml
 	dodeca_top_cox.toml
 	hex_cox.toml

@@ -48,6 +48,13 @@
 			if (index-(index/2)*2)*2-1 == -1
 				color = 'DarkGrey'
 			end
+			if alt_dir == true
+			        if rotor_dir[index] == 'CCW'
+			                color = 'Blue'
+			        else
+			                color = 'DarkGrey'
+				end
+			end
 			
 		%>
 		
@@ -78,6 +85,10 @@
 			dir = "ccw"
 			if (index-(index/2)*2)*2-1 == -1
 				dir = "cw"
+			end
+				
+			if alt_dir == true
+			        dir = rotor_dir[index].downcase
 			end
 			
 		%>
