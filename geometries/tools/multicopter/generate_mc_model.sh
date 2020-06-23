@@ -1,12 +1,13 @@
 #! /bin/bash
 
-if [ $# -lt 2 ]
+if [ $# -lt 3 ]
   then
-      echo "usage: ./generate_model.sh model_name model_id"
+      echo "usage: ./generate_model.sh model_name model_id model_parameters"
       exit
 fi
 MODEL_NAME=$1
 MODEL_ID=$2
+MODEL_PARAM=$3
 cd ../../../../../../..
 firmware_dir=`pwd`
 cd -
@@ -19,9 +20,9 @@ echo ""
 
 # Create model directory and files
 mkdir -p ${firmware_dir}/Tools/sitl_gazebo/models/$MODEL_NAME
-(cat mc_param.erb && cat functions.erb && cat mc_model.config.erb) | erb -T 1 > ${firmware_dir}/Tools/sitl_gazebo/models/$MODEL_NAME/model.config #model.config
+(cat $MODEL_PARAM && cat functions.erb && cat mc_model.config.erb) | erb -T 1 > ${firmware_dir}/Tools/sitl_gazebo/models/$MODEL_NAME/model.config #model.config
 echo "[INFO] model.config file created. (${firmware_dir}/Tools/sitl_gazebo/models/$MODEL_NAME/model.config)"
-(cat mc_param.erb && cat functions.erb && cat mc.sdf.erb) | erb -T 1 > ${firmware_dir}/Tools/sitl_gazebo/models/$MODEL_NAME/$MODEL_NAME.sdf #file.sdf
+(cat $MODEL_PARAM && cat functions.erb && cat mc.sdf.erb) | erb -T 1 > ${firmware_dir}/Tools/sitl_gazebo/models/$MODEL_NAME/$MODEL_NAME.sdf #file.sdf
 echo "[INFO] model.sdf file created. (${firmware_dir}/Tools/sitl_gazebo/models/$MODEL_NAME/$MODEL_NAME.sdf)"
 
 #ensure the model is include in sitl_target
@@ -34,11 +35,11 @@ else
 fi
 
 # create init file
-(cat mc_param.erb && cat functions.erb && cat mc_init.erb) | erb -T 1 > ${firmware_dir}/ROMFS/px4fmu_common/init.d-posix/${MODEL_ID}_$MODEL_NAME #init file
+(cat $MODEL_PARAM && cat functions.erb && cat mc_init.erb) | erb -T 1 > ${firmware_dir}/ROMFS/px4fmu_common/init.d-posix/${MODEL_ID}_$MODEL_NAME #init file
 echo "[INFO] Init file created. (${firmware_dir}/ROMFS/px4fmu_common/init.d-posix/${MODEL_ID}_$MODEL_NAME)"
 
 # create mixer file
-(cat mc_param.erb && cat functions.erb && cat mc.main.mix.erb) | erb -T 1 > ${firmware_dir}/ROMFS/px4fmu_common/mixers/$MODEL_NAME.main.mix #mixer file
+(cat $MODEL_PARAM && cat functions.erb && cat mc.main.mix.erb) | erb -T 1 > ${firmware_dir}/ROMFS/px4fmu_common/mixers/$MODEL_NAME.main.mix #mixer file
 echo "[INFO] mixer file created. (${firmware_dir}/ROMFS/px4fmu_common/mixers/$MODEL_NAME.main.mix)"
 
 # create geometry file
@@ -51,7 +52,7 @@ else
     echo "[INFO] Model included in ${firmware_dir}/src/lib/mixer/MultirotorMixer/CMakeLists.txt"
 fi
 
-(cat mc_param.erb && cat functions.erb && cat mc.toml.erb) | erb -T 1 > ${firmware_dir}/src/lib/mixer/MultirotorMixer/geometries/$MODEL_NAME.toml #mixer file
+(cat $MODEL_PARAM && cat functions.erb && cat mc.toml.erb) | erb -T 1 > ${firmware_dir}/src/lib/mixer/MultirotorMixer/geometries/$MODEL_NAME.toml #mixer file
 echo "[INFO] geometry file created. (${firmware_dir}/src/lib/mixer/MultirotorMixer/geometries/$MODEL_NAME.toml)"
 touch  ${firmware_dir}/src/lib/mixer/MultirotorMixer/CMakeLists.txt
 

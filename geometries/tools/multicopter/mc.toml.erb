@@ -21,7 +21,7 @@ Cm        = <%= momentConstant.to_s%>
 		arm_length*Math.cos(theta),
 		arm_length*Math.sin(theta),
 		0.0]
-	rotor_name = "rotor_" + index.to_s
+	rotor_name = "rotor_" + (index+1).to_s
 	dir = "CCW"
 	if (index-(index/2)*2)*2-1 == -1
 		dir = "CW"

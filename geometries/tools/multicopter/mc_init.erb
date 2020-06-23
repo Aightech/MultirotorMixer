@@ -4,8 +4,18 @@
 #
 # @type <%= model_name %> <%= model_key %>
 
+# @class Copter
+#
+<% (0..nb_rotor-1).each do |index| %>
+# @output MAIN<%= index+1 %> motor <%= index+1 %>
+
+<% end %>
 
 sh /etc/init.d/rc.mc_defaults
 set MAV_TYPE <%= mav_type %>
 
 set MIXER <%= model_name %>
+
+
+# Need to set all 8 channels
+set PWM_OUT 12345678
