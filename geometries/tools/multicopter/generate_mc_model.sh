@@ -37,7 +37,8 @@ fi
 # create init file
 (cat $MODEL_PARAM && cat functions.erb && cat mc_init.erb) | erb -T 1 > ${firmware_dir}/ROMFS/px4fmu_common/init.d-posix/${MODEL_ID}_$MODEL_NAME #init file
 echo "[INFO] Init file created. (${firmware_dir}/ROMFS/px4fmu_common/init.d-posix/${MODEL_ID}_$MODEL_NAME)"
-
+(cat $MODEL_PARAM && cat functions.erb && cat mc_init.erb) | erb -T 1 > ${firmware_dir}/ROMFS/px4fmu_common/init.d/airframes/${MODEL_ID}_$MODEL_NAME #init file
+echo "[INFO] Init file created. (${firmware_dir}/ROMFS/px4fmu_common/init.d-posix/${MODEL_ID}_$MODEL_NAME)"
 # create mixer file
 (cat $MODEL_PARAM && cat functions.erb && cat mc.main.mix.erb) | erb -T 1 > ${firmware_dir}/ROMFS/px4fmu_common/mixers/$MODEL_NAME.main.mix #mixer file
 echo "[INFO] mixer file created. (${firmware_dir}/ROMFS/px4fmu_common/mixers/$MODEL_NAME.main.mix)"
