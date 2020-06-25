@@ -32,6 +32,7 @@
 ############################################################################
 
 set(geometry_files
+	isir_hexa.toml
 	pocto.toml
 	pquad.toml
 	dodeca_bottom_cox.toml
@@ -56,8 +57,7 @@ set(geometry_files
 	quad_y.toml
 	tri_y.toml
 	twin_engine.toml
-	DACAR.toml
-	phexa.toml
+	DACAR.toml	
 )
 
 set(geometries_list)
