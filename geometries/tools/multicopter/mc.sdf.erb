@@ -1,6 +1,4 @@
-<?xml version="1.0" ?>
-
-<sdf version="1.5">
+<sdf version="1.7">
 <model name="multicopter">
 
 	<!-- ** Links Definitions ** -->
@@ -10,10 +8,13 @@
 		<pose>0 0 0 0 -0 0</pose>
 		<!-- Inertia -->
 		<%= inertia(base_m, base_xxi, base_xyi, base_xzi, base_yyi, base_yzi, base_zzi) %>
+		
 		<!-- collision -->
 		<%= collision_cylinder('base_link', base_radius, base_length) %>
+		
 		<!-- Visual -->
 		<%= visual_cylinder('base_link', base_radius, base_length, 'DarkGrey') %>
+		
 		<gravity>1</gravity>
       		<velocity_decay/>
 	</link>
@@ -23,6 +24,7 @@
 		<pose>0 0 0 0 -0 0</pose>
 		<!-- Inertia -->
 		<%= inertia(imu_m, imu_xxi, imu_xyi, imu_xzi, imu_yyi, imu_yzi, imu_zzi) %>
+		
 	</link>
 	
 	<%= joint('imu', 'revolute', '/imu_link', 'base_link', 1, 0, 0, 0, 0)%>
@@ -63,10 +65,13 @@
 		<pose> <%= a_to_s(pos_rotor)%> </pose>
 		<!-- Inertia -->
 		<%= inertia(rotor_m, rotor_xxi, rotor_xyi, rotor_xzi, rotor_yyi, rotor_yzi, rotor_zzi) %>
+		
 		<!-- collision -->
 		<%= collision_cylinder(rotor_name, rotor_radius, rotor_length) %>
+		
 		<!-- Visual -->
 		<%= visual_ext(rotor_name, 'model://rotors_description/meshes/iris_prop_ccw.dae', color) %>
+		
 		<gravity>1</gravity>
 		<velocity_decay/>
 	</link>
@@ -112,11 +117,25 @@
 	</plugin>
 		
 	<% end %>
-	
-	<plugin name='gps_plugin' filename='libgazebo_gps_plugin.so'>
-		<robotNamespace/>
-		<gpsNoise>1</gpsNoise>
-	</plugin>
+
+	<model name='gps0'>
+	        <link name='link'>
+	                <pose>0 0 0 0 -0 0</pose>
+			<sensor name='gps' type='gps'>
+			       <pose>0 0 0 0 -0 0</pose>
+			       <plugin name='gps_plugin' filename='libgazebo_gps_plugin.so'>
+				        <robotNamespace/>
+					<gpsNoise>1</gpsNoise>
+					<gpsXYRandomWalk>2.0</gpsXYRandomWalk>
+					<gpsZRandomWalk>4.0</gpsZRandomWalk>
+					<gpsXYNoiseDensity>0.0002</gpsXYNoiseDensity>
+					<gpsZNoiseDensity>0.0004</gpsZNoiseDensity>
+					<gpsVXYNoiseDensity>0.2</gpsVXYNoiseDensity>
+					<gpsVZNoiseDensity>0.4</gpsVZNoiseDensity>
+			       </plugin>
+			</sensor>
+		</link>
+	</model>
 	<plugin name='magnetometer_plugin' filename='libgazebo_magnetometer_plugin.so'>
 		<robotNamespace/>
 		<pubRate>100</pubRate>
@@ -167,6 +186,7 @@
 			</channel>
 	
 		<% end %>
+			
 		</control_channels>
 	</plugin>
 	
