@@ -32,7 +32,6 @@
 ############################################################################
 
 set(geometry_files
-	6666.toml
 	isir_hexa.toml
 	pocto.toml
 	pquad.toml
