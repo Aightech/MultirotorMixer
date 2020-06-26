@@ -1,12 +1,12 @@
 # Generic multicopter configuration
 
 [info]
-key = "6xp"
+key = "6xpi"
 description = "mc"
 
 [rotor_default]
 axis      = [0.0, 0.0, -1.0]
-Ct        = 8.54858e-06
+Ct        = 7.426e-06
 Cm        = 0.06
 
 [[rotors]]

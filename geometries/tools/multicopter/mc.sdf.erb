@@ -1,4 +1,4 @@
-<sdf version="1.7">
+<sdf version="1.6">
 <model name="multicopter">
 
 	<!-- ** Links Definitions ** -->
@@ -166,11 +166,9 @@
 	<parent>base_link</parent>
 	<child>gps0::link</child>
 	</joint>
-
 	<plugin name='groundtruth_plugin' filename='libgazebo_groundtruth_plugin.so'>
 	<robotNamespace/>
 	</plugin>
-
 	<plugin name='magnetometer_plugin' filename='libgazebo_magnetometer_plugin.so'>
 		<robotNamespace/>
 		<pubRate>100</pubRate>
@@ -214,9 +212,9 @@
 	<channel name='rotor<%= (index+1).to_s%>'>
 				<input_index><%= index.to_s%></input_index>
 				<input_offset>0</input_offset>
-				<input_scaling>1000</input_scaling>
+				<input_scaling><%= input_scaling_of_esc(ESC_gain_in_rad_per_sec)%></input_scaling>
 				<zero_position_disarmed>0</zero_position_disarmed>
-				<zero_position_armed>100</zero_position_armed>
+				<zero_position_armed>0</zero_position_armed>
 				<joint_control_type>velocity</joint_control_type>
 			</channel>
 	
