@@ -1,0 +1,12 @@
+roll_p=5
+rollrate_p=10
+rollrate_d=0.2
+rollrate_I=4
+rollrate_ff=0
+
+
+yaw_p=2
+yawrate_p=4
+yawrate_p=0.0
+yawrate_I=0
+tawrate_ff=0

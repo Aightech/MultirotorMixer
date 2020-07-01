@@ -7,7 +7,7 @@ description = "mc"
 [rotor_default]
 axis      = [0.0, 0.0, -1.0]
 Ct        = 7.426e-06
-Cm        = 0.06
+Cm        = 1.1e-07
 
 [[rotors]]
 name      = "rotor_1"
