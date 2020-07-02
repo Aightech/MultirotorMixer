@@ -3,12 +3,14 @@
 [info]
 key = "<%= model_key %>"
 description = "indus"
+mass = <%= base_m %>
+
 
 [rotor_default]
 axis      = [0.0, 0.0, -1.0]
 Ct        = <%= motorConstant.to_s%>
 
-Cm        = <%= momentConstant.to_s%>
+Cm        = <%= Cm.to_s%>
 
 
 <% (0..nb_rotor-1).each do |index| %>
