@@ -215,6 +215,16 @@ private:
     inline void mix_airmode_disabled(float roll, float pitch, float yaw, float thrust, float *squared_rotor_spd);
 
     /**
+     * Mix roll, pitch, yaw, thrust and set the outputs vector.
+     *
+     * Desaturation behavior: no airmode, thrust is NEVER increased to meet the demanded
+     * roll/pitch/yaw. Instead roll/pitch/yaw is reduced as much as needed.
+     * Thrust can be reduced to unsaturate the upper side.
+     * @see mix_yaw() for the exact yaw behavior.
+     */
+    inline void mix_yaw_tilt_controlled(float roll, float pitch, float yaw, float thrust, float *squared_rotor_spd,  float *tilt_motor_pos);
+
+    /**
      * Mix yaw by updating an existing output vector (that already contains roll/pitch/thrust).
      *
      * Desaturation behavior: thrust is allowed to be decreased up to 15% in order to allow
