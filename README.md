@@ -146,6 +146,7 @@ direction = "CCW"
 ## Launching Gazebo
 ```bash
 cd ~/src/Firmware/
+export GIT_SUBMODULES_ARE_EVIL=1
 make px4_sitl gazebo_phexa
 ```
 
