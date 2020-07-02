@@ -80,17 +80,23 @@ const char *_config_key[] = {"4x"};
 //#define debug(fmt, args...)	syslog(fmt "\n", ##args)
 
 MultirotorMixer::MultirotorMixer(ControlCallback control_cb, uintptr_t cb_handle, MultirotorGeometry geometry,float idle_speed) :
-    MultirotorMixer(control_cb, cb_handle, _config_index[(int)geometry], _config_rotor_count[(int)geometry])
+    MultirotorMixer(control_cb, cb_handle, _config_index[(int)geometry], _config_geometries_index[(int)geometry], _config_rotor_count[(int)geometry])
 {
     _idle_speed = -1.0f + idle_speed * 2.0f;	/* shift to output range here to avoid runtime calculation */
+    _mass = _config_mass[(int)geometry];
+    _Ct = _config_rotor_Ct[(int)geometry];
+    _Cm = _config_rotor_Cm[(int)geometry];
+    _thrust_ctrl_input_to_force = 2.0f*_mass*9.81f;
+
 
 }
 
-MultirotorMixer::MultirotorMixer(ControlCallback control_cb, uintptr_t cb_handle, const Rotor *rotors,
+MultirotorMixer::MultirotorMixer(ControlCallback control_cb, uintptr_t cb_handle, const Rotor *rotors, const Geometry *geo,
                  unsigned rotor_count) :
     Mixer(control_cb, cb_handle),
     _rotor_count(rotor_count),
     _rotors(rotors),
+    _geometry(geo),
     _outputs_prev(new float[_rotor_count]),
     _tmp_array(new float[_rotor_count])
 {

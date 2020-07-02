@@ -63,6 +63,15 @@ public:
     };
 
     /**
+     * geometric position of rotors
+     */
+    struct Geometry {
+        float	i;	/**< position along i axis */
+        float	j;  /**< position along j axis */
+        float dir; /**< p 1 if counter clock wise else -1*/
+    };
+
+    /**
      * Constructor.
      *
      * @param control_cb		Callback invoked to read inputs.
@@ -88,7 +97,7 @@ public:
      * @param rotors		control allocation matrix
      * @param rotor_count		length of rotors array (= number of motors)
      */
-    MultirotorMixer(ControlCallback control_cb, uintptr_t cb_handle, const Rotor *rotors, unsigned rotor_count);
+    MultirotorMixer(ControlCallback control_cb, uintptr_t cb_handle, const Rotor *rotors, const Geometry *geo, unsigned rotor_count);
     virtual ~MultirotorMixer();
 
     // no copy, assignment, move, move assignment
@@ -224,22 +233,26 @@ private:
 
     unsigned			_rotor_count;
     const Rotor			*_rotors;
+    const Geometry			*_geometry;
+
 
     //By aightech: drone mass
     //DACAR
     //float _mass = 8.5;
     //Hexacopter
-    float _mass=1.95;
+    float _mass;//1.95;
+    float _Ct; //Thrust coef
+    float _Cm; //Drag coef
 
 
     //By aightech: coefficient to get the torque and thrust control with SI.
     // Controls inputs are >-1 and <1, and correspond to the ouput of the attitude PID controller.
     // A conversion must be performed.
 
-    float _roll_ctrl_input_to_torque = 1.0f;
-    float _pitch_ctrl_input_to_torque = 1.0f;
-    float _yaw_ctrl_input_to_torque = 1.0f;
-    float _thrust_ctrl_input_to_force = 2.0f*_mass*9.81f;
+    float _roll_ctrl_input_to_torque = 10.0f;
+    float _pitch_ctrl_input_to_torque = 10.0f;
+    float _yaw_ctrl_input_to_torque = 50000.f;
+    float _thrust_ctrl_input_to_force;
     // when thrust control input is 0.5, the drone is supposed to hover
 
     //By aightech: to transform the rotation speed in PWM (depends of the ESC)
