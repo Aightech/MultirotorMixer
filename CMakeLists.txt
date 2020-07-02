@@ -32,7 +32,9 @@
 ############################################################################
 
 set(geometry_files
-	isir_hexa.toml
+	indus.toml
+	hexa_isir.toml
+	phexa.toml
 	pocto.toml
 	pquad.toml
 	dodeca_bottom_cox.toml
@@ -86,7 +88,16 @@ add_custom_command(
 	COMMAND ${PYTHON_EXECUTABLE} ${MIXER_TOOLS}/px_generate_mixers.py --sixdof -f ${geometries_list} -o mixer_multirotor_6dof.generated.h
 	DEPENDS ${MIXER_TOOLS}/px_generate_mixers.py ${geometries_list}
 	)
-add_custom_target(mixer_gen_6dof DEPENDS mixer_multirotor_6dof.generated.h)
+      add_custom_target(mixer_gen_6dof DEPENDS mixer_multirotor_6dof.generated.h)
+
+# Yaw tilt controlled  mixers
+add_custom_command(
+	OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/mixer_multirotor_tilt.generated.h
+	COMMAND ${PYTHON_EXECUTABLE} ${MIXER_TOOLS}/px_generate_mixers.py --tilt -f ${geometries_list} -o mixer_multirotor_tilt.generated.h
+	DEPENDS ${MIXER_TOOLS}/px_generate_mixers.py ${geometries_list}
+	)
+add_custom_target(mixer_gen_tilt DEPENDS mixer_multirotor_tilt.generated.h)
+
 
 add_library(MultirotorMixer
 	MultirotorMixer.cpp
@@ -95,10 +106,11 @@ add_library(MultirotorMixer
 	${CMAKE_CURRENT_BINARY_DIR}/mixer_multirotor.generated.h
 	${CMAKE_CURRENT_BINARY_DIR}/mixer_multirotor_normalized.generated.h
 	${CMAKE_CURRENT_BINARY_DIR}/mixer_multirotor_6dof.generated.h
+	${CMAKE_CURRENT_BINARY_DIR}/mixer_multirotor_tilt.generated.h
 )
 target_link_libraries(MultirotorMixer PRIVATE Mixer)
 target_include_directories(MultirotorMixer PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
-add_dependencies(MultirotorMixer mixer_gen mixer_gen_6dof prebuild_targets)
+add_dependencies(MultirotorMixer mixer_gen mixer_gen_6dof mixer_gen_tilt prebuild_targets)
 
 if(BUILD_TESTING)
 

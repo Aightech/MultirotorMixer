@@ -193,7 +193,11 @@ def geometry_to_mix(geometry):
     # Mix matrix computed as pseudoinverse of A
     B = np.linalg.pinv(A)
 
-    return A, B
+    A_tilt = np.vstack([Am[0:2], At[2,:]]) # only consider roll pitch and thrust (no yaw)
+    B_tilt1 = np.linalg.pinv(A_tilt)
+    B_tilt = np.column_stack((B_tilt1[:,0:2], B[:,2:5], B_tilt1[:,2])) #keep roll pitch and thrust columns and add columns betweento ensure compatibility
+    
+    return A, B, B_tilt
 
 def normalize_mix_px4(B):
     '''
@@ -224,7 +228,7 @@ def normalize_mix_px4(B):
 
     return B_px
 
-def generate_mixer_multirotor_header(geometries_list, use_normalized_mix=False, use_6dof=False):
+def generate_mixer_multirotor_header(geometries_list, use_normalized_mix=False, use_6dof=False, use_tilt=False):
     '''
     Generate C header file with same format as multi_tables.py
     TODO: rewrite using templates (see generation of uORB headers)
@@ -254,13 +258,14 @@ def generate_mixer_multirotor_header(geometries_list, use_normalized_mix=False, 
     buf.write(u"namespace {\n")
     for geometry in geometries_list:
         # Get desired mix matrix
-        if use_normalized_mix:
+        if use_tilt:
+            mix = geometry['mix']['B_tilt']
+        elif use_normalized_mix:
             mix = geometry['mix']['B_px']
         else:
             mix = geometry['mix']['B']
 
         buf.write(u"static constexpr MultirotorMixer::Rotor _config_{}[] {{\n".format(geometry['info']['name']))
-
         for row in mix:
             if use_6dof:
             # 6dof mixer
@@ -321,6 +326,8 @@ if __name__ == '__main__':
                         action='store_true')
     parser.add_argument('--sixdof', help='Use 6dof mixers',
                         action='store_true')
+    parser.add_argument('--tilt', help='Yaw tilt controlled',
+                        action='store_true')
     args = parser.parse_args()
 
     # Find toml files
@@ -340,18 +347,18 @@ if __name__ == '__main__':
         geometry = parse_geometry_toml(filename)
 
         # Compute torque and thrust matrices
-        A, B = geometry_to_mix(geometry)
+        A, B, B_tilt = geometry_to_mix(geometry)
 
         # Normalize mixer
         B_px = normalize_mix_px4(B)
 
         # Store matrices in geometry
-        geometry['mix'] = {'A': A, 'B': B, 'B_px': B_px}
+        geometry['mix'] = {'A': A, 'B': B, 'B_px': B_px, 'B_tilt':B_tilt}
 
         # Add to list
         geometries_list.append(geometry)
 
-        if True:#args.verbose:
+        if args.verbose:
             print('\nFilename')
             print(filename)
             print('\nGeometry')
@@ -388,7 +395,8 @@ if __name__ == '__main__':
     # Generate header file
     header = generate_mixer_multirotor_header(geometries_list,
                                               use_normalized_mix=args.normalize,
-                                              use_6dof=args.sixdof)
+                                              use_6dof=args.sixdof,
+                                              use_tilt=args.tilt)
 
     if args.outputfile is not None:
         # Write header file
