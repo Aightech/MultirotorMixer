@@ -2,7 +2,7 @@
 #
 # @name <%= model_name %> SITL
 #
-# @type <%= model_name %> <%= model_key %>
+# @type <%= model_type %>
 
 # @class Copter
 #
@@ -15,6 +15,33 @@ sh /etc/init.d/rc.mc_defaults
 set MAV_TYPE <%= mav_type %>
 
 set MIXER <%= model_name %>
+
+
+param set MC_ROLL_P <%= MC_ROLL_P  %>
+
+param set MC_ROLLRATE_P <%= MC_ROLLRATE_P  %>
+
+param set MC_ROLLRATE_D <%= MC_ROLLRATE_D  %>
+
+param set MC_ROLLRATE_I <%= MC_ROLLRATE_I  %>
+
+
+param set MC_PITCH_P <%= MC_PITCH_P  %>
+
+param set MC_PITCHRATE_P <%= MC_PITCHRATE_P  %>
+
+param set MC_PITCHRATE_D <%= MC_PITCHRATE_D  %>
+
+param set MC_PITCHRATE_I <%= MC_PITCHRATE_I  %>
+
+
+param set MC_YAW_P <%= MC_YAW_P  %>
+
+param set MC_YAWRATE_P <%= MC_YAWRATE_P  %>
+
+param set MC_YAWRATE_D <%= MC_YAWRATE_D  %>
+
+param set MC_YAWRATE_I <%= MC_YAWRATE_I  %>
 
 
 # Need to set all 8 channels

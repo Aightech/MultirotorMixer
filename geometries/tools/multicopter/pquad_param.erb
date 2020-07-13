@@ -2,6 +2,7 @@
 author="Devillard"
 model_name="pquad"
 model_key="4xp"
+model_type="Quadrotor Wide"
 
 
 
@@ -80,5 +81,22 @@ rotor_length=0.005
 # Dimension
 arm_width=0.02
 arm_length=0.25
+##########################
+
+########## Controller #########
+MC_ROLL_P = 5.0
+MC_ROLLRATE_P = 10.0
+MC_ROLLRATE_D = 0.2
+MC_ROLLRATE_I = 4
+
+MC_PITCH_P = 5.0
+MC_PITCHRATE_P = 10.0
+MC_PITCHRATE_D = 0.2
+MC_PITCHRATE_I = 4
+
+MC_YAW_P = 2.0
+MC_YAWRATE_P = 4.0
+MC_YAWRATE_D = 0
+MC_YAWRATE_I = 0
 ##########################
 %>

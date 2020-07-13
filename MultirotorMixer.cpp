@@ -353,8 +353,7 @@ MultirotorMixer::mix_yaw_tilt_controlled(float moment_roll, float moment_pitch, 
 unsigned
 MultirotorMixer::mix(float *output_sent_to_driver, unsigned space)
 {
-    //By aightech: Only one array is used but for readibility we use different name depending on the process step.
-
+    //Only one array is used but for readibility we use different name depending on the process step.
     float *squared_rotor_spd = output_sent_to_driver;
     float *rotor_spd = output_sent_to_driver;
 
@@ -362,11 +361,17 @@ MultirotorMixer::mix(float *output_sent_to_driver, unsigned space)
         return 0;
     }
 
-    //By aightech: get the controle and scale it to get approximated SI units
-    float torque_roll    = _roll_ctrl_input_to_torque   * math::constrain(get_control(0, 0) , -1.0f, 1.0f);
-    float torque_pitch   = _pitch_ctrl_input_to_torque  * math::constrain(get_control(0, 1) , -1.0f, 1.0f);
-    float torque_yaw     = _yaw_ctrl_input_to_torque    * math::constrain(get_control(0, 2) , -1.0f, 1.0f);
-    float thrust  = _thrust_ctrl_input_to_force  * math::constrain(get_control(0, 3), 0.0f, 1.0f);
+    debug("%f ", double(get_control(0, 3)));
+
+    float torque_roll    = _Ixx  * get_control(0, 0);
+    float torque_pitch   = _Iyy  * get_control(0, 1);
+    float torque_yaw     = _Izz  * get_control(0, 2);
+    //        |              |           |
+    //        |              |           '-> angular acceleretion setpoint
+    //        |              '-> Inertia of the drone
+    //        '-> Torques setpoint
+
+    float thrust  = _thrust_ctrl_input_to_force  * get_control(0, 3);
 
 
 

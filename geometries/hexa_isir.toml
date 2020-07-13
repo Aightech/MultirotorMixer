@@ -3,7 +3,7 @@
 [info]
 key = "6xpi"
 description = "mc"
-
+mass = 1.8
 [rotor_default]
 axis      = [0.0, 0.0, -1.0]
 Ct        = 7.426e-06

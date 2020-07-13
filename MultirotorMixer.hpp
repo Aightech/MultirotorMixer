@@ -256,26 +256,24 @@ private:
 
 
     //By aightech: coefficient to get the torque and thrust control with SI.
-    // Controls inputs are >-1 and <1, and correspond to the ouput of the attitude PID controller.
-    // A conversion must be performed.
+    //Controls inputs are the ouputs of the attitude PID controller (=> angular acceleretion setpoint).
+    // Inertia of the drone.
+    float _Ixx = 0.03f;
+    float _Iyy = 0.03f;
+    float _Izz = 0.6f;
 
-    float _roll_ctrl_input_to_torque = 10.0f;
-    float _pitch_ctrl_input_to_torque = 10.0f;
-    float _yaw_ctrl_input_to_torque = 50000.f;
-    float _thrust_ctrl_input_to_force;
     // when thrust control input is 0.5, the drone is supposed to hover
+    float _thrust_ctrl_input_to_force;
 
     //By aightech: to transform the rotation speed in PWM (depends of the ESC)
     // Used in SITL with Gazebo.
-
-    float _input_offset=0;
-    float _input_scaling=1047;
-    float _zero_position_armed=0;
-    float _A_speed_to_PWM =  2.0f/_input_scaling;
-    float _B_speed_to_PWM = -1.0f-2*_zero_position_armed/_input_scaling - 2*_input_offset;
+    //    float _input_offset=0;
+    //    float _input_scaling=1047;
+    //    float _zero_position_armed=0;
+    //    float _A_speed_to_PWM =  2.0f/_input_scaling;
+    //    float _B_speed_to_PWM = -1.0f-2*_zero_position_armed/_input_scaling - 2*_input_offset;
 
     // When using real motors.
-
     //Hexacopter
     float PWM_min=1000.0f;
     float PWM_max=2000.0f;
