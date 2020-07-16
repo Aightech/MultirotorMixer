@@ -63,8 +63,10 @@ rotor_m=0.005
 ESC_gain_in_rad_per_sec=1689
 maxRotVelocity=1100
 motorConstant=7.426e-06
+
 momentConstant=0.015
-rotorDragCoefficient=0.000175
+
+rotorDragCoefficient=2e-07
 rollingMomentCoefficient=1e-06
 
 # Inertia
@@ -85,19 +87,30 @@ arm_length=0.25
 ########## Controller #########
 MC_ROLL_P = 5.0
 MC_ROLLRATE_P = 10.0
-MC_ROLLRATE_D = 0.2
+MC_ROLLRATE_D = 0
 MC_ROLLRATE_I = 4
+MC_RR_INT_LIM = 0.3
+ACC_ANG_MAX_ROLL = 100
+
 
 MC_PITCH_P = 5.0
 MC_PITCHRATE_P = 10.0
-MC_PITCHRATE_D = 0.2
+MC_PITCHRATE_D = 0
 MC_PITCHRATE_I = 4
+MC_PR_INT_LIM = 0.3
+ACC_ANG_MAX_PITCH = 100
 
 MC_YAW_P = 2.0
 MC_YAWRATE_P = 4.0
 MC_YAWRATE_D = 0
 MC_YAWRATE_I = 0
+MC_YR_INT_LIM = 0.3
+ACC_ANG_MAX_YAW = 10
+
 ##########################
 
+total_xxi=0.03
+total_yyi=0.03
+total_zzi=0.06
 
 %>

@@ -87,7 +87,7 @@ public:
      *				tuned to ensure that rotors never stall at the
      * 				low end of their control range.
      */
-    MultirotorMixer(ControlCallback control_cb, uintptr_t cb_handle, MultirotorGeometry geometry,float idle_speed);
+    MultirotorMixer(ControlCallback control_cb, uintptr_t cb_handle, MultirotorGeometry geometry, float Ixx, float Iyy, float Izz);
 
     /**
      * Constructor (for testing).
@@ -260,7 +260,7 @@ private:
     // Inertia of the drone.
     float _Ixx = 0.03f;
     float _Iyy = 0.03f;
-    float _Izz = 0.6f;
+    float _Izz = 0.06f;
 
     // when thrust control input is 0.5, the drone is supposed to hover
     float _thrust_ctrl_input_to_force;

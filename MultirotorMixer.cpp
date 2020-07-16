@@ -45,7 +45,7 @@
 
 #include <mathlib/mathlib.h>
 
-#define YAW_TILT_CONTROLED 1
+//#define YAW_TILT_CONTROLED 1
 
 #ifdef MIXER_MULTIROTOR_USE_MOCK_GEOMETRY
 enum class MultirotorGeometry : MultirotorGeometryUnderlyingType {
@@ -85,16 +85,23 @@ const char *_config_key[] = {"4x"};
 //#include <debug.h>
 //#define debug(fmt, args...)	syslog(fmt "\n", ##args)
 
-MultirotorMixer::MultirotorMixer(ControlCallback control_cb, uintptr_t cb_handle, MultirotorGeometry geometry,float idle_speed) :
+MultirotorMixer::MultirotorMixer(ControlCallback control_cb, uintptr_t cb_handle, MultirotorGeometry geometry,float Ixx,float Iyy,float Izz) :
     MultirotorMixer(control_cb, cb_handle, _config_index[(int)geometry], _config_geometries_index[(int)geometry], _config_rotor_count[(int)geometry])
 {
-    _idle_speed = -1.0f + idle_speed * 2.0f;	/* shift to output range here to avoid runtime calculation */
+    //_idle_speed = -1.0f + idle_speed * 2.0f;	/* shift to output range here to avoid runtime calculation */
 
     _mass = _config_mass[(int)geometry];    //get the drone mass from the generated header
     _Ct = _config_rotor_Ct[(int)geometry];  //get the drone lift/thrust from the generated header
     _Cm = _config_rotor_Cm[(int)geometry];  //get the drone drag/moment coeficient from the generated header
 
     _thrust_ctrl_input_to_force = 2.0f*_mass*9.81f; //compute the thrust coef to ensure stationary fly with a command of 0.5
+
+    _Ixx =Ixx;
+    _Iyy =Iyy;
+    _Izz =Izz;
+
+    debug("%f %f %f", double(_Ixx), double(_Iyy), double(_Izz));
+
 
 
 }
@@ -124,7 +131,7 @@ MultirotorMixer::from_text(Mixer::ControlCallback control_cb, uintptr_t cb_handl
 {
     MultirotorGeometry geometry = MultirotorGeometry::MAX_GEOMETRY;
     char geomname[16];
-    int s[4];
+    float s[4];
     int used;
 
     /* enforce that the mixer ends with a new line */
@@ -132,7 +139,7 @@ MultirotorMixer::from_text(Mixer::ControlCallback control_cb, uintptr_t cb_handl
         return nullptr;
     }
 
-    if (sscanf(buf, "R: %15s %d %d %d %d%n", geomname, &s[0], &s[1], &s[2], &s[3], &used) != 5) {
+    if (sscanf(buf, "R: %15s %f %f %f %f%n", geomname, &s[0], &s[1], &s[2], &s[3], &used) != 5) {
         debug("multirotor parse failed on '%s'", buf);
         return nullptr;
     }
@@ -170,7 +177,9 @@ MultirotorMixer::from_text(Mixer::ControlCallback control_cb, uintptr_t cb_handl
                control_cb,
                cb_handle,
                geometry,
-               s[3] / 10000.0f); //corresponds to the last control input, i.e thrust or idle speed
+               s[0],
+               s[1],
+               s[2]); //corresponds to the last control input, i.e thrust or idle speed
 }
 
 float
@@ -361,11 +370,11 @@ MultirotorMixer::mix(float *output_sent_to_driver, unsigned space)
         return 0;
     }
 
-    debug("%f ", double(get_control(0, 3)));
+    //debug("%f ", double(get_control(0, 3)));
 
     float torque_roll    = _Ixx  * get_control(0, 0);
     float torque_pitch   = _Iyy  * get_control(0, 1);
-    float torque_yaw     = _Izz  * get_control(0, 2);
+    float torque_yaw     = _Izz  *  math::constrain(get_control(0, 2) , -1.0f, 1.0f);
     //        |              |           |
     //        |              |           '-> angular acceleretion setpoint
     //        |              '-> Inertia of the drone

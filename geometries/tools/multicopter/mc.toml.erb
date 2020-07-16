@@ -9,7 +9,7 @@ mass = <%= base_m %>
 axis      = [0.0, 0.0, -1.0]
 Ct        = <%= motorConstant.to_s%>
 
-Cm        = <%= momentConstant.to_s%>
+Cm        = <%= rotorDragCoefficient.to_s%>
 
 
 <% (0..nb_rotor-1).each do |index| %>
