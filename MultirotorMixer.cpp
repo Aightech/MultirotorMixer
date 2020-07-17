@@ -131,7 +131,7 @@ MultirotorMixer::from_text(Mixer::ControlCallback control_cb, uintptr_t cb_handl
 {
     MultirotorGeometry geometry = MultirotorGeometry::MAX_GEOMETRY;
     char geomname[16];
-    float s[4];
+    int s[4];
     int used;
 
     /* enforce that the mixer ends with a new line */
@@ -139,7 +139,7 @@ MultirotorMixer::from_text(Mixer::ControlCallback control_cb, uintptr_t cb_handl
         return nullptr;
     }
 
-    if (sscanf(buf, "R: %15s %f %f %f %f%n", geomname, &s[0], &s[1], &s[2], &s[3], &used) != 5) {
+    if (sscanf(buf, "R: %15s %d %d %d %d%n", geomname, &s[0], &s[1], &s[2], &s[3], &used) != 5) {
         debug("multirotor parse failed on '%s'", buf);
         return nullptr;
     }
@@ -177,9 +177,9 @@ MultirotorMixer::from_text(Mixer::ControlCallback control_cb, uintptr_t cb_handl
                control_cb,
                cb_handle,
                geometry,
-               s[0],
-               s[1],
-               s[2]); //corresponds to the last control input, i.e thrust or idle speed
+               s[0]/1000.f,
+               s[1]/1000.f,
+               s[2]/1000.f); //corresponds to the last control input, i.e thrust or idle speed
 }
 
 float
@@ -408,7 +408,7 @@ MultirotorMixer::mix(float *output_sent_to_driver, unsigned space)
         rotor_spd[i] = sqrt(math::constrain(squared_rotor_spd[i],0.0f,fabsf(squared_rotor_spd[i])));
 
         //debug("%f", double(rotor_spd[i]));
-        output_sent_to_driver[i] = math::constrain(((rotor_spd[i]/motor_constant_in_rad_sec_per_volt/battery_voltage)*2.0f-1.0f,-1.0f,1.0f));
+        output_sent_to_driver[i] = math::constrain((rotor_spd[i]/motor_constant_in_rad_sec_per_volt/battery_voltage)*2.0f-1.0f,-1.0f,1.0f);
 
     }
 
