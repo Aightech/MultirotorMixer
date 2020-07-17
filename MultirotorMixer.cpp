@@ -405,10 +405,12 @@ MultirotorMixer::mix(float *output_sent_to_driver, unsigned space)
     for (unsigned i = 0; i < _rotor_count; i++)
     {
         //By aightech:: root squared the rotor speed.
-        rotor_spd[i] = sqrt(math::constrain(squared_rotor_spd[i],0.0f,fabsf(squared_rotor_spd[i])));
+        rotor_spd[i] = 300;//sqrt(math::constrain(squared_rotor_spd[i],0.0f,fabsf(squared_rotor_spd[i])));
 
         //debug("%f", double(rotor_spd[i]));
-        output_sent_to_driver[i] = math::constrain((rotor_spd[i]/motor_constant_in_rad_sec_per_volt/battery_voltage)*2.0f-1.0f,-1.0f,1.0f);
+        float A=1379.5;
+        float B=-89.f;
+        output_sent_to_driver[i] = math::constrain(2.0f*rotor_spd[i]/A-1.0f -2*B/A ,-1.0f,1.0f);//math::constrain((rotor_spd[i]/motor_constant_in_rad_sec_per_volt/battery_voltage)*2.0f-1.0f,-1.0f,1.0f);
 
     }
 
