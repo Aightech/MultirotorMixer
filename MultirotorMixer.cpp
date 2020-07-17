@@ -408,7 +408,8 @@ MultirotorMixer::mix(float *output_sent_to_driver, unsigned space)
         rotor_spd[i] = sqrt(math::constrain(squared_rotor_spd[i],0.0f,fabsf(squared_rotor_spd[i])));
 
         //debug("%f", double(rotor_spd[i]));
-        output_sent_to_driver[i] = (rotor_spd[i]/motor_constant_in_rad_sec_per_volt/battery_voltage)*2.0f-1.0f;
+        output_sent_to_driver[i] = math::constrain(((rotor_spd[i]/motor_constant_in_rad_sec_per_volt/battery_voltage)*2.0f-1.0f,-1.0f,1.0f));
+
     }
 
 
