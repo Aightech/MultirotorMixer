@@ -1,120 +1,144 @@
 <%
-author="Devillard"
-model_name="hexa_isir"
-model_key="6xpi"
-model_type="Hexarotor x"
+#### General Information ####
+     # [C] Author name 
+     author="Devillard"
+     # [C] Name of the model
+     model_name="hexa_isir"
+     # [C] Key of the model (important to have the number of motor as the first character 
+     model_key="6xpi"
+     # [C] PX4 general configuration (if you want to find it under the right grouo in QGC 
+     model_type="Hexarotor x"
 
-
-# Geometry
 
 #### NUMBER OF ROTOR ####
-nb_rotor=6
-mvtype=["none","none","none","15","2","none","13","none","14"]
-mav_type=mvtype[nb_rotor]
+     # [C] The number of rotor on the multicopter 
+     nb_rotor=6  
 
-## ROTOR ANGULAR POS ####
-# IF CONSTANT ANGLE BEETWEEN ROTOR #
-#const_ang=true
-rotor_ang_offset=Math::PI/6 # angular position of the first rotor if constant angle
+     # [A] The px4 index type of the multicopter 
+     mvtype=["none","none","none","15","2","none","13","none","14"]
+     mav_type=mvtype[nb_rotor]
 
-# ELSE NON CONSTANT #
-const_ang=false
-rotor_angles=[Math::PI/2, 3*Math::PI/2, 11*Math::PI/6, 5*Math::PI/6, Math::PI/6, 7*Math::PI/6 ] # example of wide config
+#### ROTOR POS ###
+     ## ANGULAR
+     	# IF CONSTANT ANGLE BEETWEEN ROTORS #
+          # [C] Boolean to set an angle of 2*PI/nb_rotors radians between each rotors   
+	  #const_ang=true
+	  # [C] The angular position of the first rotor if constant angle
+	  rotor_ang_offset=Math::PI/6 
 
+     	# ELSE NON CONSTANT #
+     	  # [C] Boolean to set an angle of 2*PI/nb_rotors radians between each rotors   
+     	  const_ang=false
+	  # [C] If const_ang is false, then the rotors positions will be set with the following list of angles.
+	  rotor_angles=[Math::PI/2, 3*Math::PI/2, 11*Math::PI/6, 5*Math::PI/6, Math::PI/6, 7*Math::PI/6 ]
 
-alt_dir=true
-rotor_dir=["CW","CCW","CW","CCW","CCW","CW","CCW","CCW"]
+	# [C] Boolean to set the rotation diretion of each motor alternatively ClockWise then CounterClockWise
+	alt_dir=false
+	# [C] If alt_dir is false, the rotation direction will be set with the following array.
+	rotor_dir=["CW","CCW","CW","CCW","CCW","CW","CCW","CCW"]
 
+     ## ARM DIMENSION
+     arm_width=0.02
+     arm_length=0.25
+#### ROTORS DYNAMICS ####
+     # [C] Lift coef
+     motorConstant=7.426e-06
+     # [C] Drag coef
+     rotorDragCoefficient=2e-07
 
-########## BASE ##########
-# Masse
-base_m=1.8
+#### GLOBAL INERTIA ####
+     # [C] The inertia of the whole multicopter (the inertia matrix is supposed diagonal)
+     total_xxi=0.03
+     total_yyi=0.03
+     total_zzi=0.06
 
-# Inertia
-base_xxi=0.029125
-base_xyi=0
-base_xzi=0
-base_yyi=0.029125
-base_yzi=0
-base_zzi=0.055225
+     
+#### CONTROLLER #########
+     ## [C] ROLL
+     MC_ROLL_P = 5.0
+     MC_ROLLRATE_P = 10.0
+     MC_ROLLRATE_D = 0
+     MC_ROLLRATE_I = 4
+     MC_RR_INT_LIM = 0.3
+     ACC_ANG_MAX_ROLL = 100
+     # [A] Multiply all the rate gains: enable to get ang acceleration in [-1,1]
+     MC_ROLLRATE_K = 1/ACC_ANG_MAX_ROLL 
 
-# Dimension
-base_radius=0.1
-base_length=0.05
+     ## [C] PITCH
+     MC_PITCH_P = 5.0
+     MC_PITCHRATE_P = 10.0
+     MC_PITCHRATE_D = 0
+     MC_PITCHRATE_I = 4
+     MC_PR_INT_LIM = 0.3
+     ACC_ANG_MAX_PITCH = 100
+     # [A] Multiply all the rate gains: enable to get ang acceleration in [-1,1]
+     MC_PITCHRATE_K = 1/ACC_ANG_MAX_PITCH
+
+     ## [C] YAW
+     MC_YAW_P = 2.0
+     MC_YAWRATE_P = 4.0
+     MC_YAWRATE_D = 0
+     MC_YAWRATE_I = 0
+     MC_YR_INT_LIM = 0.3
+     ACC_ANG_MAX_YAW = 10
+     # [A] Multiply all the rate gains: enable to get ang acceleration in [-1,1]
+     MC_YAWRATE_K = 1/ACC_ANG_MAX_YAW
 ##########################
 
-########## IMU ###########
-# Masse
-imu_m=0.015
 
-# Inertia 
-imu_xxi=1e-05
-imu_xyi=0
-imu_xzi=0
-imu_yyi=1e-05
-imu_yzi=0
-imu_zzi=1e-05
+#### DRONE BASE (SIMU ONLY) ####
+     # [C] Masse
+     base_m=1.8
+
+     # [C] Inertia
+     base_xxi=0.029125
+     base_xyi=0
+     base_xzi=0
+     base_yyi=0.029125
+     base_yzi=0
+     base_zzi=0.055225
+
+     # [C] Dimension
+     base_radius=0.1
+     base_length=0.05
+###############################
+
+#### IMU (SIMU ONLY) ####
+     # [C] Masse
+     imu_m=0.015
+
+     # [C] Inertia 
+     imu_xxi=1e-05
+     imu_xyi=0
+     imu_xzi=0
+     imu_yyi=1e-05
+     imu_yzi=0
+     imu_zzi=1e-05
+########################
+
+#### Rotor (SIMU ONLY) ####
+     # [C] Masse
+     rotor_m=0.005
+
+     # [C] Dynamics
+     ESC_gain_in_rad_per_sec=1689
+     maxRotVelocity=1100
+     momentConstant=0.015
+     rollingMomentCoefficient=1e-06
+
+     # [C] Inertia
+     rotor_xxi=9.75e-07
+     rotor_xyi=0
+     rotor_xzi=0
+     rotor_yyi=0.000273104
+     rotor_yzi=0
+     rotor_zzi=0.000274004
+
+     # [C] Dimension
+     rotor_radius=0.128
+     rotor_length=0.005
+
 ##########################
 
-########## Rotor #########
-# Masse
-rotor_m=0.005
-
-ESC_gain_in_rad_per_sec=1689
-maxRotVelocity=1100
-motorConstant=7.426e-06
-
-momentConstant=0.015
-
-rotorDragCoefficient=2e-07
-rollingMomentCoefficient=1e-06
-
-# Inertia
-rotor_xxi=9.75e-07
-rotor_xyi=0
-rotor_xzi=0
-rotor_yyi=0.000273104
-rotor_yzi=0
-rotor_zzi=0.000274004
-rotor_radius=0.128
-rotor_length=0.005
-
-# Dimension
-arm_width=0.02
-arm_length=0.25
-##########################
-
-########## Controller #########
-MC_ROLL_P = 5.0
-MC_ROLLRATE_P = 10.0
-MC_ROLLRATE_D = 0
-MC_ROLLRATE_I = 4
-MC_RR_INT_LIM = 0.3
-ACC_ANG_MAX_ROLL = 100
-# Multiply all the rate gains: enable to get ang acceleration in [-1,1]
-MC_ROLLRATE_K = 1/ACC_ANG_MAX_ROLL 
-
-MC_PITCH_P = 5.0
-MC_PITCHRATE_P = 10.0
-MC_PITCHRATE_D = 0
-MC_PITCHRATE_I = 4
-MC_PR_INT_LIM = 0.3
-ACC_ANG_MAX_PITCH = 100
-# Multiply all the rate gains: enable to get ang acceleration in [-1,1]
-MC_PITCHRATE_K = 1/ACC_ANG_MAX_PITCH
-
-MC_YAW_P = 2.0
-MC_YAWRATE_P = 4.0
-MC_YAWRATE_D = 0
-MC_YAWRATE_I = 0
-MC_YR_INT_LIM = 0.3
-ACC_ANG_MAX_YAW = 10
-# Multiply all the rate gains: enable to get ang acceleration in [-1,1]
-MC_YAWRATE_K = 1/ACC_ANG_MAX_YAW
-##########################
-
-total_xxi=0.03
-total_yyi=0.03
-total_zzi=0.06
 
 %>
