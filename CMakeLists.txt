@@ -32,6 +32,7 @@
 ############################################################################
 
 set(geometry_files
+	quad_isir.toml
 	indus.toml
 	hexa_isir.toml
 	phexa.toml

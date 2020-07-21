@@ -2,7 +2,7 @@
 author="Devillard"
 model_name="indus"
 model_key="4ind"
-
+model_type="Tilt-Quad"		
 
 
 # Geometry
@@ -22,11 +22,52 @@ rotor_ang_offset=Math::PI/6 # angular position of the first rotor if constant an
 # ELSE NON CONSTANT #
 const_ang=false
 f_angle=Math::atan(rect_w/rect_h)
-rotor_angles=[f_angle, Math::PI + f_angle, 2*Math::PI - f_angle, Math::PI-f_angle] # example of wide config
+rotor_angles=[f_angle, Math::PI + f_angle, 2*Math::PI - f_angle, Math::PI-f_angle]
 
 
 alt_dir=true
 rotor_dir=["CCW","CCW","CW","CW","CCW","CCW","CCW","CCW"]
+
+#### GLOBAL INERTIA ####
+     # [C] Masse
+     base_m=8.5
+     # [C] The inertia of the whole multicopter (the inertia matrix is supposed diagonal)
+     total_xxi=0.04#1.38
+     total_yyi=0.04#0.84
+     total_zzi=0.08#2.17
+
+
+#### CONTROLLER #########
+     ## [C] ROLL
+     MC_ROLL_P = 5.0
+     MC_ROLLRATE_P = 10.0
+     MC_ROLLRATE_D = 0
+     MC_ROLLRATE_I = 4
+     MC_RR_INT_LIM = 0.3
+     ACC_ANG_MAX_ROLL = 100.0
+     # [A] Multiply all the rate gains: enable to get ang acceleration in [-1,1]
+     MC_ROLLRATE_K = 1/ACC_ANG_MAX_ROLL 
+
+     ## [C] PITCH
+     MC_PITCH_P = 5.0
+     MC_PITCHRATE_P = 10.0
+     MC_PITCHRATE_D = 0
+     MC_PITCHRATE_I = 4
+     MC_PR_INT_LIM = 0.3
+     ACC_ANG_MAX_PITCH = 100.0
+     # [A] Multiply all the rate gains: enable to get ang acceleration in [-1,1]
+     MC_PITCHRATE_K = 1/ACC_ANG_MAX_PITCH
+
+     ## [C] YAW
+     MC_YAW_P = 2.0
+     MC_YAWRATE_P = 4.0
+     MC_YAWRATE_D = 0
+     MC_YAWRATE_I = 0
+     MC_YR_INT_LIM = 0.3
+     ACC_ANG_MAX_YAW = 10.0
+     # [A] Multiply all the rate gains: enable to get ang acceleration in [-1,1]
+     MC_YAWRATE_K = 1/ACC_ANG_MAX_YAW
+##########################
 
 
 ########## BASE ##########
@@ -81,7 +122,8 @@ tilt_motor_length=0.035
 # Masse
 rotor_m=0.005
 
-ESC_gain_in_rad_per_sec=1689
+ESC_gain_in_rad_per_sec=1379.5
+ESC_offset_in_rad_per_sec=-89.0
 maxRotVelocity=1100
 
 motorConstant=0.00011 #4.64099e-05

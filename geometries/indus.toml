@@ -8,7 +8,7 @@ mass = 8.5
 [rotor_default]
 axis      = [0.0, 0.0, -1.0]
 Ct        = 0.00011
-Cm        = 0.0005
+Cm        = 2.5e-06
 
 [[rotors]]
 name      = "rotor_0"

@@ -102,6 +102,8 @@ MultirotorMixer::MultirotorMixer(ControlCallback control_cb, uintptr_t cb_handle
 
     debug("%f %f %f", double(_Ixx), double(_Iyy), double(_Izz));
 
+    debug("%f", double(_mass));
+
 
 
 }
@@ -350,13 +352,14 @@ MultirotorMixer::mix_yaw_tilt_controlled(float moment_roll, float moment_pitch, 
     }
 
 
-    float tilt = (moment_yaw - _Cm*sum1)/(_Ct*sum2); //\frac{M_{\vec{k}} - K_D \sum_{i=1}^{4}(-1)^i \Bar{\omega}_i^2}{d.K_l.\sum_{i=1}^{4}(-1)^{\llfloor \frac{i-1}{2} \rrfloor} \sin\theta_i\Bar{\omega}_i^2}
+    float max_ang =float(M_PI)/180.f;
+    float tilt = math::constrain((moment_yaw - _Cm*sum1)/(_Ct*sum2),-max_ang, max_ang); //\frac{M_{\vec{k}} - K_D \sum_{i=1}^{4}(-1)^i \Bar{\omega}_i^2}{d.K_l.\sum_{i=1}^{4}(-1)^{\llfloor \frac{i-1}{2} \rrfloor} \sin\theta_i\Bar{\omega}_i^2}
     //                               |
     //                               '-> seems to be always equal to 0
 
     for (unsigned i = 0; i < _rotor_count; i++)
         tilt_motor_pos[i]= sign[i]*tilt/_tilt_motor_scaling; // output the tilt angle with the right orientation depending of right/left tilt motor
-
+    //debug("%f", double(tilt_motor_pos[0]));
 }
 
 unsigned
@@ -371,10 +374,11 @@ MultirotorMixer::mix(float *output_sent_to_driver, unsigned space)
     }
 
     //debug("%f ", double(get_control(0, 3)));
+    //debug("%f", double(get_control(0, 0)));
 
     float torque_roll    = _Ixx  * get_control(0, 0);
     float torque_pitch   = _Iyy  * get_control(0, 1);
-    float torque_yaw     = _Izz  *  math::constrain(get_control(0, 2) , -1.0f, 1.0f);
+    float torque_yaw     = _Izz  * get_control(0, 2);
     //        |              |           |
     //        |              |           '-> angular acceleretion setpoint
     //        |              '-> Inertia of the drone
@@ -405,11 +409,13 @@ MultirotorMixer::mix(float *output_sent_to_driver, unsigned space)
     for (unsigned i = 0; i < _rotor_count; i++)
     {
         //By aightech:: root squared the rotor speed.
-        rotor_spd[i] = 300;//sqrt(math::constrain(squared_rotor_spd[i],0.0f,fabsf(squared_rotor_spd[i])));
+        rotor_spd[i] = sqrt(math::constrain(squared_rotor_spd[i],0.0f,fabsf(squared_rotor_spd[i])));
 
-        //debug("%f", double(rotor_spd[i]));
+        //        debug("%f", double(rotor_spd[i]));
         float A=1379.5;
         float B=-89.f;
+        //float Ap=A*2.33f;
+        //float Bp=B+538.f/A;
         output_sent_to_driver[i] = math::constrain(2.0f*rotor_spd[i]/A-1.0f -2*B/A ,-1.0f,1.0f);//math::constrain((rotor_spd[i]/motor_constant_in_rad_sec_per_volt/battery_voltage)*2.0f-1.0f,-1.0f,1.0f);
 
     }
