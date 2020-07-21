@@ -22,8 +22,8 @@
  * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
  * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
  * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
+ * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES, LOSS
+ * OF USE, DATA, OR PROFITS, OR BUSINESS INTERRUPTION) HOWEVER CAUSED
  * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
@@ -31,7 +31,12 @@
  *
  ****************************************************************************/
 
+
 #pragma once
+
+//#include <px4_platform_common/defines.h>
+#include <px4_platform_common/module_params.h>
+#include <commander/px4_custom_mode.h>
 
 #include <mixer/Mixer/Mixer.hpp>
 
@@ -49,7 +54,8 @@ enum class MultirotorGeometry : MultirotorGeometryUnderlyingType;
  * Collects four inputs (roll, pitch, yaw, thrust) and mixes them to
  * a set of outputs based on the configured geometry.
  */
-class MultirotorMixer : public Mixer
+
+class MultirotorMixer : public Mixer, public ModuleParams
 {
 public:
     /**
@@ -83,7 +89,7 @@ public:
      *				compared to thrust.
      * @param yaw_wcale		Scaling factor applied to yaw inputs compared
      *				to thrust.
-     * @param idle_speed		Minimum rotor control output value; usually
+     * @param idle_speed		Minimum rotor control output value, usually
      *				tuned to ensure that rotors never stall at the
      * 				low end of their control range.
      */
@@ -127,9 +133,9 @@ public:
 
     unsigned		mix(float *outputs, unsigned space) override;
 
-    uint16_t		get_saturation_status() override { return _saturation_status.value; }
+    uint16_t		get_saturation_status() override { return _saturation_status.value, };
 
-    void			groups_required(uint32_t &groups) override { groups |= (1 << 0); }
+    void			groups_required(uint32_t &groups) override { groups |= (1 << 0), };
 
     /**
      * @brief      Update slew rate parameter. This tells the multicopter mixer
@@ -142,8 +148,8 @@ public:
      *
      */
 
-    unsigned		set_trim(float trim) override { return _rotor_count; }
-    unsigned		get_trim(float *trim) override { return _rotor_count; }
+    unsigned		set_trim(float trim) override { return _rotor_count; };
+    unsigned		get_trim(float *trim) override { return _rotor_count; };
 
     /**
      * @brief      Sets the thrust factor used to calculate mapping from desired thrust to motor control signal output.
@@ -152,7 +158,7 @@ public:
      */
 
 
-    unsigned		get_multirotor_count() override { return _rotor_count; }
+    unsigned		get_multirotor_count() override { return _rotor_count; };
 
     union saturation_status {
         struct {
@@ -248,49 +254,40 @@ private:
 
     //By aightech: drone mass
     //DACAR
-    //float _mass = 8.5;
+    //(ParamFloat<px4::params::>) _mass = 8.5,
     //Hexacopter
-    float _mass;//1.95;
-    float _Ct; //Thrust coef
-    float _Cm; //Drag coef
-
 
     //By aightech: coefficient to get the torque and thrust control with SI.
     //Controls inputs are the ouputs of the attitude PID controller (=> angular acceleretion setpoint).
     // Inertia of the drone.
-    float _Ixx = 0.03f;
-    float _Iyy = 0.03f;
-    float _Izz = 0.06f;
-
-    // when thrust control input is 0.5, the drone is supposed to hover
-    float _thrust_ctrl_input_to_force;
-
     //By aightech: to transform the rotation speed in PWM (depends of the ESC)
     // Used in SITL with Gazebo.
-    //    float _input_offset=0;
-    //    float _input_scaling=1047;
-    //    float _zero_position_armed=0;
-    //    float _A_speed_to_PWM =  2.0f/_input_scaling;
-    //    float _B_speed_to_PWM = -1.0f-2*_zero_position_armed/_input_scaling - 2*_input_offset;
+    //    (ParamFloat<px4::params::>) _input_offset=0,
+    //    (ParamFloat<px4::params::>) _input_scaling=1047,
+    //    (ParamFloat<px4::params::>) _zero_position_armed=0,
+    //    (ParamFloat<px4::params::>) _A_speed_to_PWM =  2.0f/_input_scaling,
+    //    (ParamFloat<px4::params::>) _B_speed_to_PWM = -1.0f-2*_zero_position_armed/_input_scaling - 2*_input_offset,
+    // when thrust control input is 0.5, the drone is supposed to hover
 
     // When using real motors.
     //Hexacopter
-    float PWM_min=1000.0f;
-    float PWM_max=2000.0f;
-    float motor_constant_in_rad_sec_per_volt=960.0f*2.0f*3.1415f/60.0f;//valid for DJI E2312 ESC
-    float battery_voltage=16.8f;
-    float _tilt_motor_scaling = 1.5708f; // the scaling coef for the output of the tilt motor
+    DEFINE_PARAMETERS(
+    (ParamFloat<px4::params::MASS>) _mass,
+    (ParamFloat<px4::params::CT>) _Ct,
+    (ParamFloat<px4::params::CM>) _Cm,
+    (ParamFloat<px4::params::IXX>) _Ixx ,
+    (ParamFloat<px4::params::IYY>) _Iyy ,
+    (ParamFloat<px4::params::IZZ>) _Izz ,
+    (ParamFloat<px4::params::MOTOR_KV>) motor_constant_in_rad_sec_per_volt,
+    (ParamFloat<px4::params::BATTERY_MAX_VOLT>) battery_voltage,
+    (ParamFloat<px4::params::TILT_MOTOR_SCALING>) _tilt_motor_scaling
+    );
 
-    //DACAR Upcoming
-
-    // in theory the battery level is precompensated in the attitude controller
-
-
+    float _thrust_ctrl_input_to_force;
     //By aightech: Maximum and minimum squred rotation speed of the in rad/s
+
     float _min_speed2 = 0*0;
     float _max_speed2 = 1200*1200;
-
-
     float 				*_outputs_prev{nullptr};
     float 				*_tmp_array{nullptr};
 };
