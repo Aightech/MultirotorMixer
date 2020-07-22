@@ -44,105 +44,73 @@
  *
  * Plop
  *
- * @value 0 Disabled
- * @value 1 Roll/Pitch
- * @value 2 Roll/Pitch/Yaw
  * @group Mixer Output
  */
-PARAM_DEFINE_FLOAT(MASS, 1.95);
+PARAM_DEFINE_FLOAT(MASS, 1.95f);
 
 /**
  * Thrust coeff in N/(rad/sec)**2  / custom Mixer
  *
  * Plop
  *
- * @value 0 PX4
- * @value 1 Betaflight / Cleanflight
  *
  * @group Mixer Output
  */
-PARAM_DEFINE_FLOAT(CT, 0.0000074);
+PARAM_DEFINE_FLOAT(CT, 0.0000074f);
 
 /**
  * Torque coeff in N/(rad/sec)**2  / custom Mixer
  *
  * Plop
  *
- * @value 0 Disabled
- * @value 1 Roll/Pitch
- * @value 2 Roll/Pitch/Yaw
- * @group Mixer Output
  */
-PARAM_DEFINE_FLOAT(CM, 0.000000174);
+PARAM_DEFINE_FLOAT(CM, 0.000000174f);
 
 /**
  * IXX inertia  / custom Mixer
  *
  * Plop
  *
- * @value 0 Disabled
- * @value 1 Roll/Pitch
- * @value 2 Roll/Pitch/Yaw
- * @group Mixer Output
  */
-PARAM_DEFINE_FLOAT(IXX, 0.03);
+PARAM_DEFINE_FLOAT(IXX, 0.03f);
 
 /**
  * IYY inertia / custom Mixer
  *
  * Plop
  *
- * @value 0 Disabled
- * @value 1 Roll/Pitch
- * @value 2 Roll/Pitch/Yaw
- * @group Mixer Output
  */
-PARAM_DEFINE_FLOAT(IYY, 0.03);
+PARAM_DEFINE_FLOAT(IYY, 0.03f);
 
 /**
  * IZZ inertia / custom Mixer
  *
  * Plop
  *
- * @value 0 Disabled
- * @value 1 Roll/Pitch
- * @value 2 Roll/Pitch/Yaw
- * @group Mixer Output
  */
-PARAM_DEFINE_FLOAT(IZZ, 0.05);
+PARAM_DEFINE_FLOAT(IZZ, 0.05f);
 
 /**
  * MOTOR_CONST_IN_RAD_PER_SEC_PER_VOLT / Custom Mixer
  *
  * Plop
  *
- * @value 0 Disabled
- * @value 1 Roll/Pitch
- * @value 2 Roll/Pitch/Yaw
- * @group Mixer Output
  */
-PARAM_DEFINE_FLOAT(MOTOR_KV, 1689);
+PARAM_DEFINE_FLOAT(MOTOR_KV, 1689.0f);
 
 /**
  * BATTERY_MAX_VOLTAGE / Custom Mixer
  *
  * Plop
  *
- * @value 0 Disabled
- * @value 1 Roll/Pitch
- * @value 2 Roll/Pitch/Yaw
- * @group Mixer Output
+
  */
-PARAM_DEFINE_FLOAT(BATTERY_MAX_VOLT, 16.8);
+PARAM_DEFINE_FLOAT(BATTERY_MAX_VOLT, 16.8f);
 
 /**
  * TILT_MOTOR_SCALING / Custom Mixer
  *
  * Plop
  *
- * @value 0 Disabled
- * @value 1 Roll/Pitch
- * @value 2 Roll/Pitch/Yaw
- * @group Mixer Output
  */
-PARAM_DEFINE_FLOAT(TILT_MOT_SCALE, 1.57);
+PARAM_DEFINE_FLOAT(TILT_MOT_SCALE, 1.57f);

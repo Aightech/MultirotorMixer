@@ -35,7 +35,8 @@
 #pragma once
 
 //#include <px4_platform_common/defines.h>
-#include <px4_platform_common/module_params.h>
+//#include <px4_platform_common/module_params.h>
+#include <parameters/param.h>
 #include <commander/px4_custom_mode.h>
 
 #include <mixer/Mixer/Mixer.hpp>
@@ -55,7 +56,7 @@ enum class MultirotorGeometry : MultirotorGeometryUnderlyingType;
  * a set of outputs based on the configured geometry.
  */
 
-class MultirotorMixer : public Mixer, public ModuleParams
+class MultirotorMixer : public Mixer//, public ModuleParams
 {
 public:
     /**
@@ -93,7 +94,7 @@ public:
      *				tuned to ensure that rotors never stall at the
      * 				low end of their control range.
      */
-    MultirotorMixer(ControlCallback control_cb, uintptr_t cb_handle, MultirotorGeometry geometry, float Ixx, float Iyy, float Izz);
+    MultirotorMixer(ControlCallback control_cb, uintptr_t cb_handle, MultirotorGeometry geometry);
 
     /**
      * Constructor (for testing).
@@ -133,9 +134,9 @@ public:
 
     unsigned		mix(float *outputs, unsigned space) override;
 
-    uint16_t		get_saturation_status() override { return _saturation_status.value, };
+    uint16_t		get_saturation_status() override { return _saturation_status.value; };
 
-    void			groups_required(uint32_t &groups) override { groups |= (1 << 0), };
+    void			groups_required(uint32_t &groups) override { groups |= (1 << 0); };
 
     /**
      * @brief      Update slew rate parameter. This tells the multicopter mixer
@@ -208,8 +209,6 @@ private:
      */
     void minimize_saturation(const float *desaturation_vector, float *outputs, saturation_status &sat_status,
                  float min_output = 0.f, float max_output = 1.f, bool reduce_only = false) const;
-
-
     /**
      * Mix roll, pitch, yaw, thrust and set the outputs vector.
      *
@@ -241,10 +240,7 @@ private:
      * @param outputs output vector that is updated
      */
     inline void mix_yaw(float yaw, float *outputs);
-
     float				_idle_speed{0.0f};
-
-
     saturation_status		_saturation_status{};
 
     unsigned			_rotor_count;
@@ -271,19 +267,30 @@ private:
 
     // When using real motors.
     //Hexacopter
-    DEFINE_PARAMETERS(
-    (ParamFloat<px4::params::MASS>) _mass,
-    (ParamFloat<px4::params::CT>) _Ct,
-    (ParamFloat<px4::params::CM>) _Cm,
-    (ParamFloat<px4::params::IXX>) _Ixx ,
-    (ParamFloat<px4::params::IYY>) _Iyy ,
-    (ParamFloat<px4::params::IZZ>) _Izz ,
-    (ParamFloat<px4::params::MOTOR_KV>) motor_constant_in_rad_sec_per_volt,
-    (ParamFloat<px4::params::BATTERY_MAX_VOLT>) battery_voltage,
-    (ParamFloat<px4::params::TILT_MOTOR_SCALING>) _tilt_motor_scaling
-    );
+    //DEFINE_PARAMETERS(
+    //    (ParamFloat<px4::params::MASS>) _mass,
+    //    (ParamFloat<px4::params::CT>) _Ct,
+    //    (ParamFloat<px4::params::CM>) _Cm,
+    //    (ParamFloat<px4::params::IXX>) _Ixx,
+    //    (ParamFloat<px4::params::IYY>) _Iyy,
+    //    (ParamFloat<px4::params::IZZ>) _Izz,
+    //    (ParamFloat<px4::params::MOTOR_KV>) motor_constant_in_rad_sec_per_volt,
+    //    (ParamFloat<px4::params::BATTERY_MAX_VOLT>) battery_voltage,
+    //    (ParamFloat<px4::params::TILT_MOTOR_SCALING>) _tilt_motor_scaling
+    //)
+    float mass{2.0f};
+    float Ct{0.00000745f};
+    float Cm{0.000000745f};
+    float Ixx{0.3f};
+    float Iyy{0.3f};
+    float Izz{0.6f};
+    float motor_constant_in_rad_sec_per_volt{1689.f};
+    float battery_voltage{16.8f};
+    float tilt_motor_scaling{1.57f};
 
-    float _thrust_ctrl_input_to_force;
+    float _thrust_ctrl_input_to_force{0.f};
+
+
     //By aightech: Maximum and minimum squred rotation speed of the in rad/s
 
     float _min_speed2 = 0*0;

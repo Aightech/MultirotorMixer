@@ -85,22 +85,27 @@ const char *_config_key[] = {"4x"};
 //#include <debug.h>
 //#define debug(fmt, args...)	syslog(fmt "\n", ##args)
 
-MultirotorMixer::MultirotorMixer(ControlCallback control_cb, uintptr_t cb_handle, MultirotorGeometry geometry,float Ixx,float Iyy,float Izz) :
+MultirotorMixer::MultirotorMixer(ControlCallback control_cb, uintptr_t cb_handle, MultirotorGeometry geometry) :
     MultirotorMixer(control_cb, cb_handle, _config_index[(int)geometry], _config_geometries_index[(int)geometry], _config_rotor_count[(int)geometry])
 {
     //_idle_speed = -1.0f + idle_speed * 2.0f;	/* shift to output range here to avoid runtime calculation */
 
-    _mass = _config_mass[(int)geometry];    //get the drone mass from the generated header
-    _Ct = _config_rotor_Ct[(int)geometry];  //get the drone lift/thrust from the generated header
-    _Cm = _config_rotor_Cm[(int)geometry];  //get the drone drag/moment coeficient from the generated header
+    mass =  param_get(param_find("MASS"), &mass);    //get the drone mass from the generated header
+    Ct = param_get(param_find("CT"), &Ct);  //get the drone lift/thrust from the generated header
+    Cm = param_get(param_find("CM"), &Cm);  //get the drone drag/moment coeficient from the generated header
 
-    _thrust_ctrl_input_to_force = 2.0f*_mass*9.81f; //compute the thrust coef to ensure stationary fly with a command of 0.5
+    _thrust_ctrl_input_to_force = 2.0f*mass*9.81f; //compute the thrust coef to ensure stationary fly with a command of 0.5
 
-    _Ixx =Ixx;
-    _Iyy =Iyy;
-    _Izz =Izz;
+    Ixx =param_get(param_find("IXX"), &Ixx);
+    Iyy =param_get(param_find("IYY"), &Iyy);
+    Izz =param_get(param_find("IZZ"), &Izz);
 
-    debug("%f %f %f", double(_Ixx), double(_Iyy), double(_Izz));
+    motor_constant_in_rad_sec_per_volt=param_get(param_find("MOTOR_KV"), &motor_constant_in_rad_sec_per_volt);
+
+    battery_voltage=param_get(param_find("BATTERY_MAX_VOLT"), &battery_voltage);
+
+    tilt_motor_scaling=param_get(param_find("TILT_MOT_SCALE"), &tilt_motor_scaling);
+    //debug("%f %f %f", double(_Ixx), double(_Iyy), double(_Izz));
 
 
 
@@ -129,6 +134,7 @@ MultirotorMixer::~MultirotorMixer()
 MultirotorMixer *
 MultirotorMixer::from_text(Mixer::ControlCallback control_cb, uintptr_t cb_handle, const char *buf, unsigned &buflen)
 {
+
     MultirotorGeometry geometry = MultirotorGeometry::MAX_GEOMETRY;
     char geomname[16];
     int s[4];
@@ -176,10 +182,7 @@ MultirotorMixer::from_text(Mixer::ControlCallback control_cb, uintptr_t cb_handl
     return new MultirotorMixer(
                control_cb,
                cb_handle,
-               geometry,
-               s[0]/1000.f,
-               s[1]/1000.f,
-               s[2]/1000.f); //corresponds to the last control input, i.e thrust or idle speed
+               geometry); //corresponds to the last control input, i.e thrust or idle speed
 }
 
 float
@@ -350,12 +353,12 @@ MultirotorMixer::mix_yaw_tilt_controlled(float moment_roll, float moment_pitch, 
     }
 
 
-    float tilt = (moment_yaw - _Cm*sum1)/(_Ct*sum2); //\frac{M_{\vec{k}} - K_D \sum_{i=1}^{4}(-1)^i \Bar{\omega}_i^2}{d.K_l.\sum_{i=1}^{4}(-1)^{\llfloor \frac{i-1}{2} \rrfloor} \sin\theta_i\Bar{\omega}_i^2}
+    float tilt = (moment_yaw - Cm*sum1)/(Ct*sum2); //\frac{M_{\vec{k}} - K_D \sum_{i=1}^{4}(-1)^i \Bar{\omega}_i^2}{d.K_l.\sum_{i=1}^{4}(-1)^{\llfloor \frac{i-1}{2} \rrfloor} \sin\theta_i\Bar{\omega}_i^2}
     //                               |
     //                               '-> seems to be always equal to 0
 
     for (unsigned i = 0; i < _rotor_count; i++)
-        tilt_motor_pos[i]= sign[i]*tilt/_tilt_motor_scaling; // output the tilt angle with the right orientation depending of right/left tilt motor
+        tilt_motor_pos[i]= sign[i]*tilt/tilt_motor_scaling; // output the tilt angle with the right orientation depending of right/left tilt motor
 
 }
 
@@ -372,9 +375,9 @@ MultirotorMixer::mix(float *output_sent_to_driver, unsigned space)
 
     //debug("%f ", double(get_control(0, 3)));
 
-    float torque_roll    = _Ixx  * get_control(0, 0);
-    float torque_pitch   = _Iyy  * get_control(0, 1);
-    float torque_yaw     = _Izz  *  math::constrain(get_control(0, 2) , -1.0f, 1.0f);
+    float torque_roll    = Ixx  * get_control(0, 0);
+    float torque_pitch   = Iyy  * get_control(0, 1);
+    float torque_yaw     = Izz  *  math::constrain(get_control(0, 2) , -1.0f, 1.0f);
     //        |              |           |
     //        |              |           '-> angular acceleretion setpoint
     //        |              '-> Inertia of the drone
