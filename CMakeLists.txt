@@ -10,11 +10,11 @@
 #    notice, this list of conditions and the following disclaimer.
 # 2. Redistributions in binary form must reproduce the above copyright
 #    notice, this list of conditions and the following disclaimer in
-#    the documentation and/or other materials provided with the
-#    distribution.
-# 3. Neither the name PX4 nor the names of its contributors may be
-#    used to endorse or promote products derived from this software
-#    without specific prior written permission.
+#    THE DOCUMENTATION AND/OR OTHER MATERIALS PROVIDED WITH THE
+#    DISTRIBUTION.
+# 3. NEITHER THE NAME PX4 NOR THE NAMES OF ITS CONTRIBUTORS MAY BE
+#    USED TO ENDORSE OR PROMOTE PRODUCTS DERIVED FROM THIS SOFTWARE
+#    WITHOUT SPECIFIC PRIOR WRITTEN PERMISSION.
 #
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 # "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -31,13 +31,9 @@
 #
 ############################################################################
 
+
 set(geometry_files
-	quad_isir.toml
 	indus.toml
-	hexa_isir.toml
-	phexa.toml
-	pocto.toml
-	pquad.toml
 	dodeca_bottom_cox.toml
 	dodeca_top_cox.toml
 	hex_cox.toml
@@ -60,8 +56,9 @@ set(geometry_files
 	quad_y.toml
 	tri_y.toml
 	twin_engine.toml
-	DACAR.toml	
-)
+	)
+
+
 
 set(geometries_list)
 foreach(geom_file ${geometry_files})
@@ -91,6 +88,7 @@ add_custom_command(
 	)
       add_custom_target(mixer_gen_6dof DEPENDS mixer_multirotor_6dof.generated.h)
 
+
 # Yaw tilt controlled  mixers
 add_custom_command(
 	OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/mixer_multirotor_tilt.generated.h
@@ -100,7 +98,8 @@ add_custom_command(
 add_custom_target(mixer_gen_tilt DEPENDS mixer_multirotor_tilt.generated.h)
 
 
-add_library(MultirotorMixer
+#important to ensure the parameters are taken into account
+px4_add_library(MultirotorMixer
 	MultirotorMixer.cpp
 	MultirotorMixer.hpp
 
@@ -109,9 +108,9 @@ add_library(MultirotorMixer
 	${CMAKE_CURRENT_BINARY_DIR}/mixer_multirotor_6dof.generated.h
 	${CMAKE_CURRENT_BINARY_DIR}/mixer_multirotor_tilt.generated.h
 )
-target_link_libraries(MultirotorMixer PRIVATE Mixer)
+target_link_libraries(MultirotorMixer PRIVATE MixerBase)
 target_include_directories(MultirotorMixer PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
-add_dependencies(MultirotorMixer mixer_gen mixer_gen_6dof mixer_gen_tilt prebuild_targets)
+add_dependencies(MultirotorMixer mixer_gen mixer_gen_6dof prebuild_targets)
 
 if(BUILD_TESTING)
 
@@ -121,7 +120,7 @@ if(BUILD_TESTING)
 	)
 	target_compile_definitions(test_mixer_multirotor PRIVATE MIXER_MULTIROTOR_USE_MOCK_GEOMETRY)
 	target_compile_options(test_mixer_multirotor PRIVATE -Wno-unused-result)
-	target_link_libraries(test_mixer_multirotor PRIVATE Mixer)
+	target_link_libraries(test_mixer_multirotor PRIVATE MixerBase)
 
 	add_test(NAME mixer_multirotor
 		COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/mixer_multirotor.py --test --mixer-multirotor-binary $<TARGET_FILE:test_mixer_multirotor>

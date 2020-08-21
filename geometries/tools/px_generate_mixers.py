@@ -204,7 +204,13 @@ def geometry_to_mix(geometry):
 
     A_tilt = np.vstack([Am[0:2], At[2,:]]) # only consider roll pitch and thrust (no yaw)
     B_tilt1 = np.linalg.pinv(A_tilt)
-    B_tilt = np.column_stack((B_tilt1[:,0:2], B[:,2:5], B_tilt1[:,2])) #keep roll pitch and thrust columns and add columns betweento ensure compatibility
+    if(B_tilt1.shape[0]==4):
+            B_tilt1 = np.array([[ 0.25,  0.25,  0.25],
+                                [ 0.25,  0.25, -0.25],
+                                [ 0.25, -0.25, -0.25],
+                                [ 0.25, -0.25,  0.25]])
+    B_tilt = np.column_stack((B_tilt1[:,0:2], np.zeros((B_tilt1.shape[0],3)), B_tilt1[:,2])) #keep roll pitch and thrust columns and add columns betweento ensure compatibility
+   
     
     return A, B, B_tilt
 
@@ -285,7 +291,7 @@ def generate_mixer_multirotor_header(geometries_list, use_normalized_mix=False, 
             # 4dof mixer
                 buf.write(u"\t{{ {:9f}, {:9f}, {:9f}, {:9f} }},\n".format(
                     row[0], row[1], row[2],
-                    -row[5]))  # Upward thrust is positive TODO: to remove this, adapt PX4 to use NED correctly
+                    row[5])) 
         buf.write(u"};\n\n")
 
         #geometry of the drone
@@ -396,7 +402,7 @@ if __name__ == '__main__':
         # Add to list
         geometries_list.append(geometry)
 
-        if True:#args.verbose:
+        if args.verbose:
             print('\nFilename')
             print(filename)
             print('\nGeometry')
@@ -409,6 +415,7 @@ if __name__ == '__main__':
             print(B_px.round(2))
             print('\n-----------------------------')
 
+    print("Modified miger generation done.")
     # Check that there are no duplicated mixer names or keys
     for i in range(len(geometries_list)):
         name_i = geometries_list[i]['info']['name']

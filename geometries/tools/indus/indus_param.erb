@@ -31,10 +31,11 @@ rotor_dir=["CCW","CCW","CW","CW","CCW","CCW","CCW","CCW"]
 #### GLOBAL INERTIA ####
      # [C] Masse
      base_m=8.5
+     MC_MASS=base_m
      # [C] The inertia of the whole multicopter (the inertia matrix is supposed diagonal)
-     total_xxi=0.04#1.38
-     total_yyi=0.04#0.84
-     total_zzi=0.08#2.17
+     MC_INERTIA_XX=0.04#1.38
+     MC_INERTIA_YY=0.04#0.84
+     MC_INERTIA_ZZ=0.08#2.17
 
 
 #### CONTROLLER #########
@@ -57,6 +58,7 @@ rotor_dir=["CCW","CCW","CW","CW","CCW","CCW","CCW","CCW"]
      ACC_ANG_MAX_PITCH = 100.0
      # [A] Multiply all the rate gains: enable to get ang acceleration in [-1,1]
      MC_PITCHRATE_K = 1/ACC_ANG_MAX_PITCH
+     MC_TEST_P = 0.42
 
      ## [C] YAW
      MC_YAW_P = 2.0
@@ -67,6 +69,12 @@ rotor_dir=["CCW","CCW","CW","CW","CCW","CCW","CCW","CCW"]
      ACC_ANG_MAX_YAW = 10.0
      # [A] Multiply all the rate gains: enable to get ang acceleration in [-1,1]
      MC_YAWRATE_K = 1/ACC_ANG_MAX_YAW
+
+
+     PWM_TILT_MAX1 = 1930
+     PWM_TILT_MAX2 = 1070
+     PWM_TILT_MIN1 = 1870
+     PWM_TILT_MIN2 = 1010
 ##########################
 
 
