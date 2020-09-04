@@ -1,5 +1,6 @@
 # Install
 ## Ubuntu
+
 ```bash
 cd ~/Download
 wget https://raw.githubusercontent.com/PX4/Devguide/v1.9.0/build_scripts/ubuntu_sim_ros_melodic.sh
@@ -12,6 +13,35 @@ sudo chmod +x ubuntu_sim_ros_melodic.sh
 cd ~/src/Firmware/src/lib/mixer/
 rm MultirotorMixer/* -rf
 git clone git@github.com:Aightech/MultirotorMixer.git
+```
+### Ruby
+if it's not already installed and updated
+```bash
+sudo apt-get install ruby-full
+```
+
+### Gazebo
+```bash
+# Gazebo (9) simulator dependencies
+sudo apt-get install protobuf-compiler libeigen3-dev libopencv-dev -y
+sudo sh -c 'echo "deb http://packages.osrfoundation.org/gazebo/ubuntu-stable `lsb_release -cs` 	main" > /etc/apt/sources.list.d/gazebo-stable.list'
+
+## Setup keys
+wget http://packages.osrfoundation.org/gazebo.key -O - | sudo apt-key add -
+
+## Update the debian database:
+sudo apt-get update -y
+
+## Install Gazebo9
+sudo apt-get install gazebo9 -y
+
+## For developers (who work on top of Gazebo) one extra package
+sudo apt-get install libgazebo9-dev -
+```
+
+### Gstreamer 1.0
+```bash
+sudo apt-get install libgstreamer-plugins-base1.0-dev
 ```
 
 
@@ -28,7 +58,7 @@ Then launch the generate_model script with the name of your model and a free ID
 Now you can run the gazebo simulation:
 ```bash
 cd ~/src/Firmware/
-make px4_sitl gazebo_phexa
+make px4_sitl gazebo_phexa # make px4_sitl gazebo_[model name]
 ```
 
 ## Files
