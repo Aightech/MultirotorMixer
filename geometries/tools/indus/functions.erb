@@ -154,6 +154,25 @@ def joint(name, type, child, parent, dx, dy, dz, lmin, lmax)
     end
 ##########################################
 #-->
+
+#<!--
+############# MACRO Gear  ##############
+def gearJoint(name, child, parent, fixed, dx, dy, dz)
+'<joint name="' + name + '_joint" type="gearbox">
+		<child>' + child + '</child>
+		<parent>' + parent + '</parent>
+		<gearbox_ratio>-1</gearbox_ratio>
+		<gearbox_reference_body>' + fixed + '</gearbox_reference_body>
+		<axis>
+			<xyz>'+dx.to_s+' '+dy.to_s+' '+dz.to_s+'</xyz>
+		</axis>
+		<axis2>
+			<xyz>'+dx.to_s+' '+dy.to_s+' '+dz.to_s+'</xyz>
+		</axis2>
+	</joint>'
+    end
+##########################################
+#-->
    
 
 #<!--

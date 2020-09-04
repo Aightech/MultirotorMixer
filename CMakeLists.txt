@@ -33,6 +33,7 @@
 
 
 set(geometry_files
+	hexa_isir.toml
 	indus.toml
 	dodeca_bottom_cox.toml
 	dodeca_top_cox.toml
@@ -101,30 +102,31 @@ add_custom_target(mixer_gen_tilt DEPENDS mixer_multirotor_tilt.generated.h)
 #important to ensure the parameters are taken into account
 px4_add_library(MultirotorMixer
 	MultirotorMixer.cpp
-	MultirotorMixer.hpp
-
+        MultirotorMixer.hpp
 	${CMAKE_CURRENT_BINARY_DIR}/mixer_multirotor.generated.h
 	${CMAKE_CURRENT_BINARY_DIR}/mixer_multirotor_normalized.generated.h
 	${CMAKE_CURRENT_BINARY_DIR}/mixer_multirotor_6dof.generated.h
 	${CMAKE_CURRENT_BINARY_DIR}/mixer_multirotor_tilt.generated.h
-)
-target_link_libraries(MultirotorMixer PRIVATE MixerBase)
-target_include_directories(MultirotorMixer PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
-add_dependencies(MultirotorMixer mixer_gen mixer_gen_6dof prebuild_targets)
-
-if(BUILD_TESTING)
-
-	add_executable(test_mixer_multirotor
-		test_mixer_multirotor.cpp
-		MultirotorMixer.cpp
-	)
-	target_compile_definitions(test_mixer_multirotor PRIVATE MIXER_MULTIROTOR_USE_MOCK_GEOMETRY)
-	target_compile_options(test_mixer_multirotor PRIVATE -Wno-unused-result)
-	target_link_libraries(test_mixer_multirotor PRIVATE MixerBase)
-
-	add_test(NAME mixer_multirotor
-		COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/mixer_multirotor.py --test --mixer-multirotor-binary $<TARGET_FILE:test_mixer_multirotor>
-		WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
 	)
 
-endif()
+target_link_libraries(MultirotorMixer PRIVATE MixerBase parameters)
+target_include_directories(MultirotorMixer PRIVATE ${CMAKE_CURRENT_BINARY_DIR} parameters)
+#add_dependencies(MultirotorMixer mixer_gen mixer_gen_6dof mixer_gen_tilt prebuild_targets parameters_interface parameters)
+#set_property(GLOBAL APPEND PROPERTY PX4_MODULE_CONFIG_FILES ${CMAKE_CURRENT_SOURCE_DIR}/module.yaml)
+
+# if(BUILD_TESTING)
+
+# 	add_executable(test_mixer_multirotor
+# 		test_mixer_multirotor.cpp
+# 		MultirotorMixer.cpp
+# 	)
+# 	target_compile_definitions(test_mixer_multirotor PRIVATE MIXER_MULTIROTOR_USE_MOCK_GEOMETRY)
+# 	target_compile_options(test_mixer_multirotor PRIVATE -Wno-unused-result)
+# 	target_link_libraries(test_mixer_multirotor PRIVATE MixerBase)
+
+# 	add_test(NAME mixer_multirotor
+# 		COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/mixer_multirotor.py --test --mixer-multirotor-binary $<TARGET_FILE:test_mixer_multirotor>
+# 		WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+# 	)
+
+# endif()

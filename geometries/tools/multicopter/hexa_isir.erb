@@ -47,10 +47,13 @@
      rotorDragCoefficient=2e-07
 
 #### GLOBAL INERTIA ####
+     # [C] Masse
+     base_m=1.8
+     MC_MASS=base_m
      # [C] The inertia of the whole multicopter (the inertia matrix is supposed diagonal)
-     total_xxi=0.03
-     total_yyi=0.03
-     total_zzi=0.06
+     MC_INERTIA_XX=0.029#1.38
+     MC_INERTIA_YY=0.029#0.84
+     MC_INERTIA_ZZ=0.05#2.17
 
      
 #### CONTROLLER #########
@@ -87,8 +90,6 @@
 
 
 #### DRONE BASE (SIMU ONLY) ####
-     # [C] Masse
-     base_m=1.8
 
      # [C] Inertia
      base_xxi=0.029125

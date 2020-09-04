@@ -206,8 +206,8 @@ def geometry_to_mix(geometry):
     B_tilt1 = np.linalg.pinv(A_tilt)
     if(B_tilt1.shape[0]==4):
             B_tilt1 = np.array([[ 0.25,  0.25,  0.25],
-                                [ 0.25,  0.25, -0.25],
-                                [ 0.25, -0.25, -0.25],
+                                [-0.25, -0.25,  0.25],
+                                [-0.25,  0.25,  0.25],
                                 [ 0.25, -0.25,  0.25]])
     B_tilt = np.column_stack((B_tilt1[:,0:2], np.zeros((B_tilt1.shape[0],3)), B_tilt1[:,2])) #keep roll pitch and thrust columns and add columns betweento ensure compatibility
    

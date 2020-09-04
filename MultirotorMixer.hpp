@@ -34,7 +34,16 @@
 #pragma once
 
 #include <mixer/MixerBase/Mixer.hpp>
-#include <parameters/param.h>
+
+//#include <parameters/param.h>
+
+#include <lib/parameters/param.h>
+//#include "../../parameters/flashparams/flashparams.h"
+//#include <px4_module_params.h>
+
+//#include <px4_platform_common/module_params.h>
+//#include <px4_platform_common/module_params.h>
+
 
 
 /**
@@ -157,36 +166,36 @@ public:
 	};
 
 private:
-	/**
-	 * Computes the gain k by which desaturation_vector has to be multiplied
-	 * in order to unsaturate the output that has the greatest saturation.
-	 * @see also minimize_saturation().
-	 *
-	 * @return desaturation gain
-	 */
-	float compute_desaturation_gain(const float *desaturation_vector, const float *outputs, saturation_status &sat_status,
-					float min_output, float max_output) const;
+    /**
+     * Computes the gain k by which desaturation_vector has to be multiplied
+     * in order to unsaturate the output that has the greatest saturation.
+     * @see also minimize_saturation().
+     *
+     * @return desaturation gain
+     */
+    inline float compute_desaturation_gain(const float *desaturation_vector, const float *outputs, saturation_status &sat_status,
+                    float min_output, float max_output) const;
 
-	/**
-	 * Minimize the saturation of the actuators by adding or substracting a fraction of desaturation_vector.
-	 * desaturation_vector is the vector that added to the output outputs, modifies the thrust or angular
-	 * acceleration on a specific axis.
-	 * For example, if desaturation_vector is given to slide along the vertical thrust axis (thrust_scale), the
-	 * saturation will be minimized by shifting the vertical thrust setpoint, without changing the
-	 * roll/pitch/yaw accelerations.
-	 *
-	 * Note that as we only slide along the given axis, in extreme cases outputs can still contain values
-	 * outside of [min_output, max_output].
-	 *
-	 * @param desaturation_vector vector that is added to the outputs, e.g. thrust_scale
-	 * @param outputs output vector that is modified
-	 * @param sat_status saturation status output
-	 * @param min_output minimum desired value in outputs
-	 * @param max_output maximum desired value in outputs
-	 * @param reduce_only if true, only allow to reduce (substract) a fraction of desaturation_vector
-	 */
-	void minimize_saturation(const float *desaturation_vector, float *outputs, saturation_status &sat_status,
-				 float min_output = 0.f, float max_output = 1.f, bool reduce_only = false) const;
+    /**
+     * Minimize the saturation of the actuators by adding or substracting a fraction of desaturation_vector.
+     * desaturation_vector is the vector that added to the output outputs, modifies the thrust or angular
+     * acceleration on a specific axis.
+     * For example, if desaturation_vector is given to slide along the vertical thrust axis (thrust_scale), the
+     * saturation will be minimized by shifting the vertical thrust setpoint, without changing the
+     * roll/pitch/yaw accelerations.
+     *
+     * Note that as we only slide along the given axis, in extreme cases outputs can still contain values
+     * outside of [min_output, max_output].
+     *
+     * @param desaturation_vector vector that is added to the outputs, e.g. thrust_scale
+     * @param outputs output vector that is modified
+     * @param sat_status saturation status output
+     * @param min_output minimum desired value in outputs
+     * @param max_output maximum desired value in outputs
+     * @param reduce_only if true, only allow to reduce (substract) a fraction of desaturation_vector
+     */
+    void minimize_saturation(const float *desaturation_vector, float *outputs, saturation_status &sat_status,
+                 float min_output = 0.f, float max_output = 1.f, bool reduce_only = false) const;
 
 
     /**
@@ -211,15 +220,13 @@ private:
 	 */
 	inline void mix_yaw(float yaw, float *outputs);
 
-    void mix_yaw_tilt_controlled(float moment_roll, float moment_pitch, float moment_yaw, float thrust, float mean_tilt, float *delta_tilt, float *squared_rotor_spd);
+    inline void mix_yaw_tilt_controlled(float moment_roll, float moment_pitch, float moment_yaw, float thrust, float mean_tilt, float *delta_tilt, float *squared_rotor_spd);
 
 
 	unsigned			_rotor_count;
 	const Rotor			*_rotors;
     const Geometry		*_geometry;
 
-    float *_allocation_matrix;
-    float **_allocation_matrix2;
     float _param_mc_Ixx;// Inertia XX of the drone.
     float _param_mc_Iyy;// Inertia YY of the drone.
     float _param_mc_Izz;// Inertia ZZ of the drone.
@@ -233,10 +240,14 @@ private:
     float _param_mc_min_speed2;//Minimum squred rotation speed of the in (rad/s)^1
     float _param_mc_tilt_motor_scaling = 1;//1.5708f; // the scaling coef for the output of the tilt motor
 
-    int _param_mc_pwm_max = 2000;
-    int _param_mc_pwm_min = 1000;
-    int _param_mc_pwm_tilt_max[2];
-    int _param_mc_pwm_tilt_min[2];
+
+    float *_allocation_matrix;
+
+    float m_alpha_min[2];
+    float m_alpha_max[2];
+    float m_alpha_a[2];
+    float m_alpha_b[2];
+
 
 	float 				*_outputs_prev{nullptr};
 	float 				*_tmp_array{nullptr};
@@ -244,5 +255,5 @@ private:
 
 
 
-    float g(float x);
+    inline float g(float x);
 };

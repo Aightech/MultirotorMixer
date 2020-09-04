@@ -84,9 +84,15 @@
 		
 		<gravity>1</gravity>
 		<velocity_decay/>
-	</link>
-	<%= joint(tilt_name, 'revolute', tilt_name, 'base_link', 0, 1, 0, -Math::PI/180, Math::PI/180)%>
-		
+	      </link>
+	
+	      
+	<%= joint(tilt_name, 'revolute', tilt_name, 'base_link', 0, 1 -2*(index/2), 0,  -2*Math::PI/180, 90*Math::PI/180)%>
+
+	<% if index >1 %>
+	<%= gearJoint(tilt_name+"_gear", tilt_name, "tilt_motor_" + (3-index).to_s, "base_link", 0, 1 -2*(index/2), 0)%>
+	<%end%>
+	
 	<link name="<%= rotor_name %>">
 		<!-- Position -->
 		<pose> <%= a_to_s(pos_rotor)%> </pose>
@@ -239,9 +245,9 @@
 		<control_channels>
 		<% (0..nb_rotor-1).each do |index| %>
 	<channel name='rotor<%= (index).to_s%>'>
-				<input_index><%= index.to_s%></input_index>
-				<input_offset>0</input_offset>
+	                        <input_index><%= index.to_s%></input_index>
 				<input_scaling><%= ESC_gain_in_rad_per_sec %></input_scaling>
+				<input_offset>0</input_offset>
 				<zero_position_disarmed>0 </zero_position_disarmed>
 				<zero_position_armed><%= ESC_offset_in_rad_per_sec %></zero_position_armed>
 				<joint_name>rotor_<%= (index).to_s%>_joint</joint_name>
@@ -250,23 +256,39 @@
 	
 		<% end %>
 			
-		<% (0..nb_rotor-1).each do |index| %>	
+		<% (0..2-1).each do |index| %>
+		<%
+		pwm_tilt_max = [PWM_TILT_MAX1, PWM_TILT_MAX2]
+		pwm_tilt_min = [PWM_TILT_MIN1, PWM_TILT_MIN2]
+		pwm_max = 1950.0
+		pwm_min = 1000.0
+		
+		alpha_max = (2*pwm_tilt_max[index] - (pwm_max+pwm_min))/(pwm_max-pwm_min)
+		alpha_min = (2*pwm_tilt_min[index] - (pwm_max+pwm_min))/(pwm_max-pwm_min)
+		alpha_a = (-1-1)/(ANG_TILT_MIN - ANG_TILT_MAX)
+		alpha_b = -1 - alpha_a*ANG_TILT_MIN
+
+		tilt_scale = 2/(alpha_max-alpha_min)/alpha_a
+		tilt_offset =  -(alpha_max+alpha_min)/(alpha_max-alpha_min)/alpha_a -alpha_b/alpha_a
+		
+		%>
+		
 	                <channel name="tilt_motor_<%= (index).to_s%>">
 			        <input_index>            <%= (index+4).to_s%>                  </input_index>
+				<input_scaling>          <%= (1-2*index) *tilt_scale %> </input_scaling>
 				<input_offset>           0                  </input_offset>
-				<input_scaling>          <%= tilt_motor_input_scaling %>                  </input_scaling>
 				<zero_position_disarmed> 0                  </zero_position_disarmed>
-				<zero_position_armed>    0                  </zero_position_armed>
-				<joint_control_type>     position </joint_control_type>
+				<zero_position_armed>    <%= (1-2*index) *tilt_offset %> </zero_position_armed>
+				<joint_control_type>     position           </joint_control_type>
 				<joint_name>             tilt_motor_<%= (index).to_s%>_joint </joint_name>
 				 <joint_control_pid>
-				   <p>5</p>
+				   <p>0.1</p>
 				   <i>0</i>
-				   <d>0</d>
+				   <d>0.01</d>
 				   <iMax>0.0</iMax>
 				   <iMin>0.0</iMin>
-				   <cmdMax>2</cmdMax>
-				   <cmdMin>-2</cmdMin>
+				   <cmdMax><%= 90*Math::PI %></cmdMax>
+				   <cmdMin><%= -2*Math::PI/180 %></cmdMin>
 				 </joint_control_pid>
 			</channel>
 		<% end %>
