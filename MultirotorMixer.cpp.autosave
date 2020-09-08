@@ -368,9 +368,9 @@ MultirotorMixer::mix(float *output_sent_to_driver, unsigned space)
     //debug("%f %f %f %f",double(_param_mc_Ixx), double(_param_mc_Iyy),double(_param_mc_Izz), double(2.0f*_param_mc_mass*9.81f));
     debug("cmd %f %f %f %f",double(get_control(0, 0)), double(get_control(0, 1)),double(get_control(0, 2)), double(get_control(0, 3)));
 
-    float torque_roll    = 10*_param_mc_Ixx  * get_control(0, 0);
-    float torque_pitch   = 10*_param_mc_Iyy  * get_control(0, 1);
-    float torque_yaw     = 10*_param_mc_Izz  * get_control(0, 2);
+    float torque_roll   = 10*_param_mc_Ixx * get_control(0, 0);
+    float torque_pitch  = 10*_param_mc_Iyy * get_control(0, 1);
+    float torque_yaw    = 10*_param_mc_Izz * get_control(0, 2);
     //        |              |           |
     //        |              |           '-> angular acceleretion setpoint
     //        |              '-> Inertia of the drone
