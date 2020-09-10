@@ -1,6 +1,6 @@
-# Install
-## Ubuntu
+# Install (Ubuntu)
 
+## PX4 & ROS
 ```bash
 cd ~/Download
 wget https://raw.githubusercontent.com/PX4/Devguide/v1.9.0/build_scripts/ubuntu_sim_ros_melodic.sh
@@ -8,19 +8,19 @@ sudo chmod +x ubuntu_sim_ros_melodic.sh
 ./ubuntu_sim_ros_melodic.sh
 ```
 
-### clone custom Multirotor Mixer
+## Replace Multirotor Mixer by the custom one
 ```bash
 cd ~/src/Firmware/src/lib/mixer/
 rm MultirotorMixer/* -rf
 git clone git@github.com:Aightech/MultirotorMixer.git
 ```
-### Ruby
+## Ruby
 if it's not already installed and updated
 ```bash
 sudo apt-get install ruby-full
 ```
 
-### Gazebo
+## Gazebo
 ```bash
 # Gazebo (9) simulator dependencies
 sudo apt-get install protobuf-compiler libeigen3-dev libopencv-dev -y
@@ -39,26 +39,29 @@ sudo apt-get install gazebo9 -y
 sudo apt-get install libgazebo9-dev -
 ```
 
-### Gstreamer 1.0
+## Gstreamer 1.0
 ```bash
 sudo apt-get install libgstreamer-plugins-base1.0-dev
 ```
 
 
-# New config
-## Esay Multicopter
+# Create a new Model
+## Essay Multicopter
 ```bash
 cd ~/src/Firmware/src/lib/mixer/MultirotorMixer/geometries/tools/multicopter
 ```
-Open the file called mc_param.erb and customize the multicopter parameters.
-Then launch the generate_model script with the name of your model and a free ID
+Duplicate the file called mc_param.erb, rename it as {your_model_name}_param.erb and customize the parameters in the file. It is really important to choose a model_key that is different from those already existing.
+
+Then launch the generate_model script with the name of your model, a free ID and the name of the previous file which is {your_model_name}_param.erb.
+The ID must be a number different from those already existing, look at the files in Firmware/ROMFS/px4fmu_common/init.d-posix to choose it.
+An example is given below
 ```bash
-./generate_mc_model phexa 10040 
+./generate_mc_model mc_isir 10040 mc_param.erb
 ```
-Now you can run the gazebo simulation:
+Now you can run the gazebo simulation :
 ```bash
 cd ~/src/Firmware/
-make px4_sitl gazebo_phexa # make px4_sitl gazebo_[model name]
+make px4_sitl gazebo_mc_isir # make px4_sitl gazebo_[model name]
 ```
 
 ## Files
