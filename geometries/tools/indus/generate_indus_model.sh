@@ -24,6 +24,10 @@ mkdir -p ${firmware_dir}/Tools/sitl_gazebo/models/$MODEL_NAME
 echo "[INFO] model.config file created. (${firmware_dir}/Tools/sitl_gazebo/models/$MODEL_NAME/model.config)"
 (cat $MODEL_PARAM && cat functions.erb && cat indus.sdf.erb) | erb -T 1 > ${firmware_dir}/Tools/sitl_gazebo/models/$MODEL_NAME/$MODEL_NAME.sdf #file.sdf
 echo "[INFO] model.sdf file created. (${firmware_dir}/Tools/sitl_gazebo/models/$MODEL_NAME/$MODEL_NAME.sdf)"
+if [ -d "confidential/meshes" ]; then
+    cp -r confidential/meshes ${firmware_dir}/Tools/sitl_gazebo/models/$MODEL_NAME/
+    echo "[INFO] Confidential models have been copied in: (${firmware_dir}/Tools/sitl_gazebo/models/$MODEL_NAME/meshes)"
+fi
 
 #ensure the model is include in sitl_target
 if grep -Fq "$MODEL_NAME" ${firmware_dir}/platforms/posix/cmake/sitl_target.cmake
@@ -59,7 +63,7 @@ touch  ${firmware_dir}/src/lib/mixer/MultirotorMixer/CMakeLists.txt
 
 
 #To enable the use of parameter in multirotors
-cp CMakeLists_parameters.txt ${firmware_dir}/src/Firmware/src/lib/parameters/CMakeLists.txtf
+cp CMakeLists_parameters.txt ${firmware_dir}/src/lib/parameters/CMakeLists.txt
 
 
 

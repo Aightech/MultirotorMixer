@@ -5,15 +5,25 @@
 	<!-- * Base Definitions * -->
 	<link name="base_link">
 		<!-- Position -->
-		<pose>0 0 0 0 -0 0</pose>
+		<pose>0 0 0.35 0 -0 0</pose>
 		<!-- Inertia -->
 		<%= inertia(base_m, base_xxi, base_xyi, base_xzi, base_yyi, base_yzi, base_zzi) %>
 		
 		<!-- collision -->
-		<%= collision_cylinder('base_link', base_radius, base_length) %>
-		
+		<%= collision_wing('base_link', 0.45, 2.5, 0.15, [-0.01, 0, -0.09, 0, -0, 0]) %>
+
 		<!-- Visual -->
+		<% if File.exists? File.join('confidential/meshes/untitled.stl') %>
+
+		<%= visual_box('base_link_column_right', 0.74, 0.03, 0.03, 'Grey', [0, -0.475, 0.01, 0, -0, 0]) %>
+		
+		<%= visual_ext('base_link', "model://DACAR/meshes/untitled.stl", 'White', [0.17, 0, 0.02, 0, -0, 1.5708], [0.001,0.001,0.001]) %>
+
+		<%= visual_box('base_link_column_left', 0.74, 0.03, 0.03, 'Grey', [0, 0.475, 0.01, 0, -0, 0]) %>
+		<% else %>
+		
 		<%= visual_cylinder('base_link', base_radius, base_length, 'DarkGrey') %>
+		<% end %>
 		
 		<gravity>1</gravity>
       		<velocity_decay/>
@@ -26,8 +36,98 @@
 		<%= inertia(imu_m, imu_xxi, imu_xyi, imu_xzi, imu_yyi, imu_yzi, imu_zzi) %>
 		
 	</link>
-	
 	<%= joint('imu', 'revolute', '/imu_link', 'base_link', 1, 0, 0, 0, 0)%>
+	
+	<!-- <link name='right_elevon'> -->
+	<!--         <!-\- Position -\-> -->
+	<!--         <pose frame=''>-0.124720 -0.829266 0.396834 -0.093490 0.001436 0.016471</pose> -->
+	<!-- 	<!-\- Inertia -\-> -->
+	<!-- 	<%= inertia(0.00000000001, 0.000000001, 0, 0, 0.000000001, 0, 0.000000001) %> -->
+
+	<!-- 	<!-\- collision -\-> -->
+	<!-- 	<% collision_wing('right_elevon', 0.058634, 0.391614, 0.000598) %> -->
+
+	<!-- 	<!-\- Visual -\-> -->
+	<!-- 	<%= visual_box('right_elevon', 0.058634, 0.582127, 0.000598, 'Grey') %> -->
+	<!-- </link> -->
+	<!-- <%= joint('right_elevon', 'revolute', 'right_elevon', 'base_link', 0, 1, 0, -0.25, 0.25,[0.025, 0.28, -0.005, 0, -0, 0], [0,0,2])%> -->
+
+	
+	<!-- <link name='left_elevon'> -->
+	<!--         <!-\- Position -\-> -->
+	<!--         <pose frame=''>-0.124720 0.829266 0.396834 0.093490 0.001436 -0.016471</pose> -->
+	<!-- 	<!-\- Inertia -\-> -->
+	<!-- 	<%= inertia(0.00000000001, 0.000000001, 0, 0, 0.000000001, 0, 0.000000001) %> -->
+
+	<!-- 	<!-\- collision -\-> -->
+	<!-- 	<% collision_wing('left_elevon', 0.058634, 0.391614, 0.000598) %> -->
+
+	<!-- 	<!-\- Visual -\-> -->
+	<!-- 	<%= visual_box('left_elevon', 0.058634, 0.582127, 0.000598, 'Grey') %> -->
+	<!-- </link> -->
+	<!-- <%= joint('left_elevon', 'revolute', 'left_elevon', 'base_link', 0, 1, 0, -0.25, 0.25,[0.025, -0.28, -0.005, 0, -0, 0], [0,0,2])%> -->
+
+
+	<!-- <link name='right_airbreak'> -->
+	<!--         <!-\- Position -\-> -->
+	<!--         <pose frame=''>-0.132948 -0.232139 0.368761 0 -0.000108 0</pose> -->
+	<!-- 	<!-\- Inertia -\-> -->
+	<!-- 	<%= inertia(0.00000000001, 0.000000001, 0, 0, 0.000000001, 0, 0.000000001) %> -->
+
+	<!-- 	<!-\- collision -\-> -->
+	<!-- 	<% collision_wing('right_airbreak', 0.058634, 0.391614, 0.000598) %> -->
+
+	<!-- 	<!-\- Visual -\-> -->
+	<!-- 	<%= visual_box('right_airbreak', 0.058634 ,0.391614 ,0.000598, 'Grey') %> -->
+	<!-- </link> -->
+	<!-- <%= joint('right_airbreak', 'revolute', 'right_airbreak', 'base_link', 0, 1, 0, -0.25, 0.25,[0.025, 0.18, -0.005, 0, -0, 0], [0,0,2])%> -->
+	
+	<!-- <link name='left_airbreak'> -->
+	<!--         <!-\- Position -\-> -->
+	<!--         <pose frame=''>-0.132948 0.2354 0.368768 0 -5.4e-05 0</pose> -->
+	<!-- 	<!-\- Inertia -\-> -->
+	<!-- 	<%= inertia(0.00000000001, 0.000000001, 0, 0, 0.000000001, 0, 0.000000001) %> -->
+
+	<!-- 	<!-\- collision -\-> -->
+	<!-- 	<% collision_wing('left_airbreak', 0.058634, 0.391614, 0.000598) %> -->
+
+	<!-- 	<!-\- Visual -\-> -->
+	<!-- 	<%= visual_box('left_airbreak', 0.058634 ,0.391614 ,0.000598, 'Grey') %> -->
+	<!-- </link> -->
+	<!-- <%= joint('left_airbreak', 'revolute', 'left_airbreak', 'base_link', 0, 1, 0, -0.25, 0.25,[0.025, -0.18, -0.005, 0, -0, 0], [0,0,2])%> -->
+
+	<!-- <link name='queue_ag'> -->
+	<!--         <!-\- Position -\-> -->
+	<!--         <pose frame=''>-1.26985 0.175395 0.33711 0.613889 -0.000186 3e-06</pose> -->
+	<!-- 	<!-\- Inertia -\-> -->
+	<!-- 	<%= inertia(0.00000000001, 0.000000001, 0, 0, 0.000000001, 0, 0.000000001) %> -->
+
+	<!-- 	<!-\- collision -\-> -->
+	<!-- 	<% collision_wing('queue_ag', 0.058634, 0.391614 ,0.000598) %> -->
+
+	<!-- 	<!-\- Visual -\-> -->
+	<!-- 	<%= visual_box('queue_ag', 0.058634, 0.391614 ,0.000598, 'Grey') %> -->
+	<!-- </link> -->
+	<!-- <%= joint('queue_ag', 'revolute', 'queue_ag', 'base_link', 0, 1, 0, -0.53, 0.53,[0.03, 0, 0, 0, -0, 0], [0,0,2])%> -->
+
+	<!-- <link name='queue_ad'> -->
+	<!--         <!-\- Position -\-> -->
+	<!--         <pose frame=''>-1.26985 -0.175395 0.33711 -0.613889 -0.000186 3e-06</pose> -->
+	<!-- 	<!-\- Inertia -\-> -->
+	<!-- 	<%= inertia(0.00000000001, 0.000000001, 0, 0, 0.000000001, 0, 0.000000001) %> -->
+
+	<!-- 	<!-\- collision -\-> -->
+	<!-- 	<% collision_wing('queue_ad', 0.058634, 0.391614 ,0.000598) %> -->
+
+	<!-- 	<!-\- Visual -\-> -->
+	<!-- 	<%= visual_box('queue_ad', 0.058634, 0.391614 ,0.000598, 'Grey') %> -->
+	<!-- </link> -->
+	<!-- <%= joint('queue_ad', 'revolute', 'queue_ad', 'base_link', 0, 1, 0, -0.53, 0.53,[0.03, 0, 0, 0, -0, 0], [0,0,2])%> -->
+	
+	
+
+
+
 	
 	
 	
@@ -41,7 +141,7 @@
 			pos_rotor = [
 				arm_length*Math.cos(theta),
 				arm_length*Math.sin(theta),
-				tilt_motor_radius,
+				0.42-0.1*(index-(index/2)*2),
 				0,
 				0,
 				0]
@@ -50,7 +150,7 @@
 			pos_tilt = [
 				arm_length*Math.cos(theta),
 				arm_length*Math.sin(theta),
-				0,
+				0.37,
 				0,
 				0,
 				0]

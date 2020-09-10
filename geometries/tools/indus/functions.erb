@@ -21,6 +21,93 @@ def box(dx, dy, dz)
 #-->
 
 #<!--
+############# MACRO BOX Visual ##############
+def visual_box(name, dx, dy, dz, color, pos=[0,0,0,0,0,0])
+'<visual name="' + name + '_visual">
+			<pose frame=''>'+ pos[0].to_s + ' '+ pos[1].to_s + ' '+ pos[2].to_s+ ' ' + pos[3].to_s + ' '+ pos[4].to_s + ' '+ pos[5].to_s + '</pose>
+			<geometry>
+				<box>
+					<size> ' + dx.to_s + ' ' + dy.to_s + ' ' + dz.to_s + ' </size>
+	 			</box>
+			</geometry>
+			<material>
+				<script>
+					<name>Gazebo/' + color + '</name>
+					<uri>file://media/materials/scripts/gazebo.material</uri>
+				</script>
+				<shader type=\'pixel\'/>
+          			<emissive>0 0 0 1</emissive>
+			</material>
+			<transparency>0</transparency>
+        		<cast_shadows>1</cast_shadows>
+		</visual>'
+    end
+##########################################
+#-->
+
+#<!--
+############# MACRO wing Collision ##############
+def collision_wing(name, dx, dy, dz, pos=[0,0,0,0,0,0])
+'<collision name="' + name + '_colision">
+			<laser_retro>0</laser_retro>
+			<max_contacts>10</max_contacts>
+			<pose frame=''>'+ pos[0].to_s + ' '+ pos[1].to_s + ' '+ pos[2].to_s+ ' ' + pos[3].to_s + ' '+ pos[4].to_s + ' '+ pos[5].to_s + '</pose>
+			<geometry>
+				<box>
+					<size> ' + dx.to_s + ' ' + dy.to_s + ' ' + dz.to_s + ' </size>
+				</box>
+			</geometry>
+			<surface>
+				<friction>
+					<ode>
+						<mu>1</mu>
+						<mu2>1</mu2>
+						<fdir1>0 0 0</fdir1>
+						<slip1>0</slip1>
+						<slip2>0</slip2>
+					</ode>
+					<torsional>
+						<coefficient>1</coefficient>
+						<patch_radius>0</patch_radius>
+						<surface_radius>0</surface_radius>
+						<use_patch_radius>1</use_patch_radius>
+						<ode>
+							<slip>0</slip>
+						</ode>
+					</torsional>
+				</friction>
+				<bounce>
+					<restitution_coefficient>0</restitution_coefficient>
+					<threshold>1e+06</threshold>
+				</bounce>
+				<contact>
+					<collide_without_contact>0</collide_without_contact>
+					<collide_without_contact_bitmask>1</collide_without_contact_bitmask>
+					<collide_bitmask>1</collide_bitmask>
+					<ode>
+						<soft_cfm>0</soft_cfm>
+						<soft_erp>0.2</soft_erp>
+						<kp>1e+13</kp>
+						<kd>1</kd>
+						<max_vel>0.01</max_vel>
+						<min_depth>0</min_depth>
+					</ode>
+					<bullet>
+						<split_impulse>1</split_impulse>
+						<split_impulse_penetration_threshold>-0.01</split_impulse_penetration_threshold>
+						<soft_cfm>0</soft_cfm>
+						<soft_erp>0.2</soft_erp>
+						<kp>1e+13</kp>
+						<kd>1</kd>
+					</bullet>
+				</contact>
+			</surface>
+		</collision>'
+    end
+##########################################
+#-->
+
+#<!--
 ############# MACRO CYLINDER Collision ##############
 def collision_cylinder(name, radius, length, pos=[0,0,0,0,0,0])
 '<collision name="' + name + '_colision">
@@ -71,22 +158,26 @@ def visual_cylinder(name, radius, length, color, pos=[0,0,0,0,0,0])
 
 #<!--
 ############# MACRO VISUAL EXT ##############
-def visual_ext(name, uri, color)
+def visual_ext(name, uri, color, pos=[0,0,0,0,0,0], scale=[1,1,1])
 '<visual name="' + name + '_visual">
-			<pose frame=''>0 0 0 0 -0 0</pose>
+			<pose frame=''>'+ pos[0].to_s + ' '+ pos[1].to_s + ' '+ pos[2].to_s+ ' ' + pos[3].to_s + ' '+ pos[4].to_s + ' '+ pos[5].to_s + '</pose>
 			<geometry>
 				<mesh>
-					<scale>1 1 1</scale>
+					<scale>'+ scale[0].to_s + ' '+ scale[1].to_s + ' '+ scale[2].to_s+ '</scale>
 					<uri>'+uri+'</uri>
 				</mesh>
 			</geometry>
 			<material>
 				<script>
 					<name>Gazebo/' + color + '</name>
-					<uri>file://media/materials/scripts/gazebo.material</uri>
+					<uri>__default__</uri>
 				</script>
+				<shader type=\'pixel\'/>
+          			<emissive>0 0 0 1</emissive>
 			</material>
-			</visual>'
+			<transparency>0</transparency>
+        		<cast_shadows>1</cast_shadows>
+		</visual>'
     end
 ##########################################
 #-->
@@ -134,10 +225,11 @@ def inertia(m, xx, xy, xz, yy, yz, zz)
 
 #<!--
 ############# MACRO Joint  ##############
-def joint(name, type, child, parent, dx, dy, dz, lmin, lmax)
+def joint(name, type, child, parent, dx, dy, dz, lmin, lmax, pos=[0,0,0,0,0,0], dynamic=[0,0,0])
 '<joint name="' + name + '_joint" type="'+type+'">
 		<child>' + child + '</child>
 		<parent>' + parent + '</parent>
+		<pose frame=''>'+ pos[0].to_s + ' '+ pos[1].to_s + ' '+ pos[2].to_s+ ' ' + pos[3].to_s + ' '+ pos[4].to_s + ' '+ pos[5].to_s + '</pose>
 		<axis>
 			<xyz>'+dx.to_s+' '+dy.to_s+' '+dz.to_s+'</xyz>
 			<limit>
@@ -145,8 +237,9 @@ def joint(name, type, child, parent, dx, dy, dz, lmin, lmax)
 				<upper>'+lmax.to_s+'</upper>
 			</limit>
 			<dynamics>
-				<spring_reference>0</spring_reference>
-				<spring_stiffness>0</spring_stiffness>
+				<spring_reference>'+ dynamic[0].to_s + '</spring_reference>
+				<spring_stiffness>'+ dynamic[1].to_s + '</spring_stiffness>
+				<damping>'+ dynamic[2].to_s + '</damping>
 			</dynamics>
 			<use_parent_model_frame>1</use_parent_model_frame>
 		</axis>

@@ -60,4 +60,4 @@ touch  ${firmware_dir}/src/lib/mixer/MultirotorMixer/CMakeLists.txt
 
 
 
-cp CMakeLists_parameters.txt ${firmware_dir}/src/Firmware/src/lib/parameters/CMakeLists.txt
+cp CMakeLists_parameters.txt ${firmware_dir}/src/lib/parameters/CMakeLists.txt
