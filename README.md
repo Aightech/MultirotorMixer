@@ -1,6 +1,6 @@
-# Install
-## Ubuntu
+# Install (Ubuntu)
 
+## PX4 & ROS
 ```bash
 cd ~/Download
 wget https://raw.githubusercontent.com/PX4/Devguide/v1.9.0/build_scripts/ubuntu_sim_ros_melodic.sh
@@ -8,19 +8,19 @@ sudo chmod +x ubuntu_sim_ros_melodic.sh
 ./ubuntu_sim_ros_melodic.sh
 ```
 
-### clone custom Multirotor Mixer
+## Replace Multirotor Mixer by the custom one
 ```bash
 cd ~/src/Firmware/src/lib/mixer/
 rm MultirotorMixer/* -rf
 git clone git@github.com:Aightech/MultirotorMixer.git
 ```
-### Ruby
+## Ruby
 if it's not already installed and updated
 ```bash
 sudo apt-get install ruby-full
 ```
 
-### Gazebo
+## Gazebo
 ```bash
 # Gazebo (9) simulator dependencies
 sudo apt-get install protobuf-compiler libeigen3-dev libopencv-dev -y
@@ -39,39 +39,44 @@ sudo apt-get install gazebo9 -y
 sudo apt-get install libgazebo9-dev -
 ```
 
-### Gstreamer 1.0
+## Gstreamer 1.0
 ```bash
 sudo apt-get install libgstreamer-plugins-base1.0-dev
 ```
 
 
-# New config
-## Esay Multicopter
+# Create a new Model
+## Essay Multicopter
 ```bash
 cd ~/src/Firmware/src/lib/mixer/MultirotorMixer/geometries/tools/multicopter
 ```
-Open the file called mc_param.erb and customize the multicopter parameters.
-Then launch the generate_model script with the name of your model and a free ID
+Duplicate the file called mc_param.erb, rename it as {your_model_name}_param.erb and customize the parameters in the file. It is really important to choose a model_key that is different from those already existing.
+
+Then launch the generate_model script with the name of your model, a free ID and the name of the previous file which is {your_model_name}_param.erb.
+The ID must be a number different from those already existing, look at the files in Firmware/ROMFS/px4fmu_common/init.d-posix to choose it.
+An example is given below
 ```bash
-./generate_mc_model phexa 10040 
+./generate_mc_model mc_isir 10040 mc_param.erb
 ```
-Now you can run the gazebo simulation:
+Now you can run the gazebo simulation :
 ```bash
 cd ~/src/Firmware/
-make px4_sitl gazebo_phexa # make px4_sitl gazebo_[model name]
+make px4_sitl gazebo_mc_isir # make px4_sitl gazebo_[model name]
 ```
 
-## Files
+## What the generate file does
+
+### Files created
 - [ ] [*Model*](#Model) (Tools/sitl_gazebo/models/ .config & .sdf)
 - [ ] [*Init*](#Init) (ROMFS/px4fmu_common/init.d-posix/ )
     - [ ] *Init.d* (ROMFS/px4fmu_common/init.d/rc.mc_default)
     - [ ] [*Mixer*](#Mixer) (ROMFS/px4fmu_common/mixers/)
         - [ ] [*Geometry*](#Geometry) (/src/lib/mixer/MultirotorMixer/geometries/)
 
-## Model
+### Model
 In Tools/sitl_gazebo/models/ create directory with the name of your model (ex:phexa) and add in this directory: 
 - Config file for the metadata of the model (ex: model.config)
-### Example
+#### Example
 ```xml
 <?xml version="1.0"?>
 <model>
@@ -92,13 +97,13 @@ In Tools/sitl_gazebo/models/ create directory with the name of your model (ex:ph
 
 In platforms/posix/cmake/sitl_target.cmake add your model to the list starting with set(models ... 
 
-## Init
+### Init
 In ROMFS/px4fmu_common/init.d-posix/ create a file with the name of your model suffixed with an unused ID (ex: 10040_phexa):
 - [ ] Specify the init.d file (ex: sh /etc/init.d/rc.mc_defaults )
 - [ ] Specify the MAV_TYPE of the model (ex: set MAV_TYPE 13) 2:quad 13:hexa (impact the way output/pwm are processed)
 - [ ] Specify the mixer (ROMFS/px4fmu_common/mixer/*.main.mix files) it will use (ex: set MIXER phexa)
 
-### Example
+#### Example
 ```bash
 #!/bin/sh
 #
@@ -112,24 +117,24 @@ set MAV_TYPE 13
 set MIXER phexa
 ```
 
-## Mixer
+### Mixer
 In ROMFS/px4fmu_common/mixers/ create a file with the name of your mixer and the extension .main.mix (ex: phexa.main.mix):
 - [ ] Specify the geometry (/src/lib/mixer/MultirotorMixer/geometries/.toml) it will use (ex 6xp).
 - [ ] For now the other param are unused.
 
-### Example 
+#### Example 
 ```
 # Hexa XP
 
 R: 6xp 10000 10000 10000 0
 ```
-## Geometry
+### Geometry
 In /src/lib/mixer/MultirotorMixer/geometries/ create a file with the name of your geometry and the extension .toml (ex: phexa.toml):
 - [ ] Specify the key of your geometry (the one specified in the mixer file) (ex: key = "6xp")
 - [ ] Specify the geometry of your different rotors.
 
 In /src/lib/mixer/MultirotorMixer/CMakeLists.txt add your geometry to the list starting with `set(geometry_files ...`
-### Example
+#### Example
 ```toml
 # Generic multicopter configuration
 
@@ -173,28 +178,28 @@ position  = [0.22, -0.13, 0.0]
 direction = "CCW"
 ```
 
-## Launching Gazebo
+### Launching Gazebo
 ```bash
 cd ~/src/Firmware/
 export GIT_SUBMODULES_ARE_EVIL=1
 make px4_sitl gazebo_phexa
 ```
 
-# ERB
+## ERB
 In the folder geometries/tools directory there are different files you can use to generate .toml and .sdf model for parametred multirotors
 
 ```bash
 cd ~/src/Firmware/src/lib/mixer/MultirotorMixer/geometries/tools
 ```
-## Parameters File
+### Parameters File
 In the file mc_param.erb you can set the parmeters of your multcopter.
 
-## Create .sdf files
+### Create .sdf files
 ```bash
 (cat mc_param.erb && cat functions.erb && cat mc.sdf.erb) | erb -T 1 > ~/src/Firmware/Tools/sitl_gazebo/models/phexa/phexa.sdf
 ```
 
-## Create .toml files
+### Create .toml files
 ```bash
 (cat mc_param.erb && cat functions.erb && cat mc.toml.erb) | erb -T 1 > ~/src/Firmware/src/lib/mixer/MultirotorMixer/geometries/phexa.toml
 ```
