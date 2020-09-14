@@ -119,19 +119,19 @@ set MIXER phexa
 
 ### Mixer
 In ROMFS/px4fmu_common/mixers/ create a file with the name of your mixer and the extension .main.mix (ex: phexa.main.mix):
-- [ ] Specify the geometry (/src/lib/mixer/MultirotorMixer/geometries/.toml) it will use (ex 6xp).
-- [ ] For now the other param are unused.
+- [ ] Specify the geometry key (/src/lib/mixer/MultirotorMixer/geometries/.toml) it will use (ex 6xp).
 
 #### Example 
 ```
 # Hexa XP
 
-R: 6xp 10000 10000 10000 0
+R: 6xp
 ```
 ### Geometry
 In /src/lib/mixer/MultirotorMixer/geometries/ create a file with the name of your geometry and the extension .toml (ex: phexa.toml):
 - [ ] Specify the key of your geometry (the one specified in the mixer file) (ex: key = "6xp")
 - [ ] Specify the geometry of your different rotors.
+- [ ] This file is used to generate at build time the diferent headers (mixer_multirotor_*.generated.h) containing the pseuso inversed allocation matrix of each drones. 
 
 In /src/lib/mixer/MultirotorMixer/CMakeLists.txt add your geometry to the list starting with `set(geometry_files ...`
 #### Example
