@@ -209,3 +209,20 @@ In the file mc_param.erb you can set the parmeters of your multcopter.
 ![doc 2](docs/drone.png)
 ![doc 3](docs/drone2.png)
 
+# Tilt controlled 
+The code alson enable to controlle a quadrotor with tilting rotors. The files related to this drone are stored in gemometries/tools/indus.
+To generate the different files do :
+```bash
+./generate_indus_model.sh indus 10044 indus_param.erb
+```
+
+## SDF model
+If you own the confidential STL files then you can create a folder gemometries/tools/indus/confidential and copy inside your folder called meshes.
+If you don't, the stl model will be generated with simple forms.
+
+## Code
+If you want to use the tilt control then you should uncomment the line 
+```
+#define YAW_TILT_CONTROLLED
+```
+in the file MultirotorMixer.cpp
