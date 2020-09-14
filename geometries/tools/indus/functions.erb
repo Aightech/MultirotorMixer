@@ -211,7 +211,7 @@ def inertia(m, xx, xy, xz, yy, yz, zz)
 			<pose frame=''>0 0 0 0 -0 0</pose>
 			<mass> ' + m.to_s + '</mass>
 			<inertia>
-				<ixx>' + xx.to_s + '</ixx>
+				<ixx>' +  xx.to_s + '</ixx>
 				<ixy>' + xy.to_s + '</ixy>
 				<ixz>' + xz.to_s + '</ixz>
 				<iyy>' + yy.to_s + '</iyy>
@@ -225,7 +225,7 @@ def inertia(m, xx, xy, xz, yy, yz, zz)
 
 #<!--
 ############# MACRO Joint  ##############
-def joint(name, type, child, parent, dx, dy, dz, lmin, lmax, pos=[0,0,0,0,0,0], dynamic=[0,0,0])
+def joint(name, type, child, parent, dx, dy, dz, lmin, lmax, pos=[0,0,0,0,0,0], dynamic=[0,0,0], physics=false)
 '<joint name="' + name + '_joint" type="'+type+'">
 		<child>' + child + '</child>
 		<parent>' + parent + '</parent>
@@ -243,6 +243,17 @@ def joint(name, type, child, parent, dx, dy, dz, lmin, lmax, pos=[0,0,0,0,0,0], 
 			</dynamics>
 			<use_parent_model_frame>1</use_parent_model_frame>
 		</axis>
+		' +
+		(if(physics==true)
+		then
+		'<physics>
+			<ode>	
+          			<implicit_spring_damper>1</implicit_spring_damper>
+        		</ode>
+      		</physics>'
+		else
+		''
+		end)+ '
 	</joint>'
     end
 ##########################################

@@ -102,8 +102,8 @@ MultirotorMixer::MultirotorMixer(ControlCallback control_cb, uintptr_t cb_handle
 
     /// The angular acceleration control inputs are previously constraint beetween -1 and 1 by dividing by the maximal angular acceleration
     /// So we need to multiply them by the maximal angular acceleration to get SI units
-    _param_mc_Ixx*=_param_mc_max_angular_acceleration_yaw;
-    _param_mc_Iyy*=_param_mc_max_angular_acceleration_yaw;
+    _param_mc_Ixx*=_param_mc_max_angular_acceleration_roll;
+    _param_mc_Iyy*=_param_mc_max_angular_acceleration_pitch;
     _param_mc_Izz*=_param_mc_max_angular_acceleration_yaw;
 
 
@@ -348,7 +348,9 @@ MultirotorMixer::mix_yaw_tilt_controlled(float moment_roll, float moment_pitch, 
     float sum2=fabsf(_geometry[0].j)*_param_mc_mass*9.81f;
 
     float max_ang =2.0f*float(M_PI)/180.f;//degree
-    *delta_tilt = math::constrain(g(mean_tilt)*(10*moment_yaw)/sum2, -max_ang, max_ang);
+    debug("mg: %f g: %f",double(sum2), double(g(mean_tilt)));
+
+    *delta_tilt = -math::constrain(g(mean_tilt)*(moment_yaw)/sum2, -max_ang, max_ang);
 
 
 }
@@ -364,16 +366,18 @@ MultirotorMixer::mix(float *output_sent_to_driver, unsigned space)
         return 0;
     }
     //debug("%f %f %f %f",double(_param_mc_Ixx), double(_param_mc_Iyy),double(_param_mc_Izz), double(2.0f*_param_mc_mass*9.81f));
-    //debug("cmd %f %f %f %f",double(get_control(0, 0)), double(get_control(0, 1)),double(get_control(0, 2)), double(get_control(0, 3)));
 
-    float torque_roll    = 10*_param_mc_Ixx  * get_control(0, 0);
-    float torque_pitch   = 10*_param_mc_Iyy  * get_control(0, 1);
-    float torque_yaw     = 10*_param_mc_Izz  * get_control(0, 2);
+
+    float torque_roll    = 4*_param_mc_Ixx  * get_control(0, 0);
+    float torque_pitch   = 2.5f*_param_mc_Iyy  * get_control(0, 1);
+    float torque_yaw     = _param_mc_Izz  * get_control(0, 2);
     //        |              |           |
     //        |              |           '-> angular acceleretion setpoint
     //        |              '-> Inertia of the drone
     //        '-> Torques setpoint
     float thrust  = 2.0f*_param_mc_mass*9.81f  * get_control(0, 3);
+
+    //debug("cmd r%f p%f y%f t%f",double(torque_roll), double(torque_pitch),double(torque_yaw), double(torque_yaw));
 
 
 
@@ -414,7 +418,7 @@ MultirotorMixer::mix(float *output_sent_to_driver, unsigned space)
 #ifdef YAW_TILT_CONTROLLED
     for(int i =0; i<2; i++)
     {
-        float tilt = 0;//delta_tilt + (-1+i*2)*mean_tilt;
+        float tilt = delta_tilt;// + (-1+i*2)*mean_tilt;
         //debug("tilt:%d %f ",i,double(tilt));
 
         float alpha = m_alpha_a[i]*tilt+m_alpha_b[i];
