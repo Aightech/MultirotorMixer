@@ -38,6 +38,15 @@ else
     echo "[INFO] Model included in ${firmware_dir}/platforms/posix/cmake/sitl_target.cmake)"
 fi
 
+#ensure the model is include in sitl_target
+if grep -Fq "$MODEL_NAME" ${firmware_dir}/ROMFS/px4fmu_common/init.d-posix/CMakeLists.txt
+then
+    echo "[INFO] Model already included in ${firmware_dir}/ROMFS/px4fmu_common/init.d-posix/CMakeLists.txt"
+else
+    sed -i "/px4_add_romfs_files( /a \\\t$MODEL_NAME" ${firmware_dir}/ROMFS/px4fmu_common/init.d-posix/CMakeLists.txt
+    echo "[INFO] Model included in ${firmware_dir}/ROMFS/px4fmu_common/init.d-posix/CMakeLists.txt"
+fi
+
 # create init file
 (cat $MODEL_PARAM && cat functions.erb && cat indus_init.erb) | erb -T 1 > ${firmware_dir}/ROMFS/px4fmu_common/init.d-posix/${MODEL_ID}_$MODEL_NAME #init file
 echo "[INFO] Init file created. (${firmware_dir}/ROMFS/px4fmu_common/init.d-posix/${MODEL_ID}_$MODEL_NAME)"
