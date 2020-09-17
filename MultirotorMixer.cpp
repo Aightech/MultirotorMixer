@@ -117,15 +117,20 @@ MultirotorMixer::MultirotorMixer(ControlCallback control_cb, uintptr_t cb_handle
         int _param_mc_pwm_max = 2000;
         int _param_mc_pwm_min = 1000;
         param_get(param_find("PWM_MAX"), &_param_mc_pwm_max);
-        param_get(param_find("PWM_MAX"), &_param_mc_pwm_max);
-        param_get(param_find("PWM_TILT_MAX1"), _param_mc_pwm_tilt_max);
-        param_get(param_find("PWM_TILT_MAX2"), _param_mc_pwm_tilt_max+1);
+        param_get(param_find("PWM_MIN"), &_param_mc_pwm_min);
+        debug("kkee %d %d ", _param_mc_pwm_min,_param_mc_pwm_max);
+
+
         param_get(param_find("PWM_TILT_MIN1"), _param_mc_pwm_tilt_min);
         param_get(param_find("PWM_TILT_MIN2"), _param_mc_pwm_tilt_min+1);
 
+        param_get(param_find("PWM_TILT_MAX1"), _param_mc_pwm_tilt_max);
+        param_get(param_find("PWM_TILT_MAX2"), _param_mc_pwm_tilt_max+1);
+
         param_get(param_find("ANG_TILT_MIN1"), _param_mc_ang_tilt_min);
-        param_get(param_find("ANG_TILT_MAX1"), _param_mc_ang_tilt_max);
         param_get(param_find("ANG_TILT_MIN2"), _param_mc_ang_tilt_min+1);
+
+        param_get(param_find("ANG_TILT_MAX1"), _param_mc_ang_tilt_max);
         param_get(param_find("ANG_TILT_MAX2"), _param_mc_ang_tilt_max+1);
 
         for(int i =0; i<2; i++)
@@ -421,12 +426,12 @@ MultirotorMixer::mix(float *output_sent_to_driver, unsigned space)
 #ifdef YAW_TILT_CONTROLLED
     for(int i =0; i<2; i++)
     {
-        float tilt = delta_tilt + (-1+i*2)*mean_tilt;
+        float tilt = (-1+i*2)*mean_tilt + delta_tilt;
         //debug("tilt:%d %f ",i,double(tilt));
 
         float alpha = m_alpha_a[i]*tilt+m_alpha_b[i];
         tilt_motor_pos[i]= math::constrain(alpha*(m_alpha_max[i]-m_alpha_min[i])/2.0f+(m_alpha_min[i]+m_alpha_max[i])/2.0f,m_alpha_min[i], m_alpha_max[i]); // output the tilt angle with the right orientation depending of right/left tilt motor
-        //debug("%d %f %f %f",i,double(m_alpha_min[i]),double(tilt_motor_pos[i]),double(m_alpha_max[i]));
+        debug("%d %f %f %f",i,double(m_alpha_min[i]),double(tilt_motor_pos[i]),double(m_alpha_max[i]));
     }
 
     return _rotor_count+2; // each rotors has been mixed + each tilt motors
