@@ -112,8 +112,8 @@ MultirotorMixer::MultirotorMixer(ControlCallback control_cb, uintptr_t cb_handle
     {
         int _param_mc_pwm_tilt_max[2];
         int _param_mc_pwm_tilt_min[2];
-        float _param_mc_ang_tilt_min;
-        float _param_mc_ang_tilt_max;
+        float _param_mc_ang_tilt_min[2];
+        float _param_mc_ang_tilt_max[2];
         int _param_mc_pwm_max = 2000;
         int _param_mc_pwm_min = 1000;
         param_get(param_find("PWM_MAX"), &_param_mc_pwm_max);
@@ -123,14 +123,17 @@ MultirotorMixer::MultirotorMixer(ControlCallback control_cb, uintptr_t cb_handle
         param_get(param_find("PWM_TILT_MIN1"), _param_mc_pwm_tilt_min);
         param_get(param_find("PWM_TILT_MIN2"), _param_mc_pwm_tilt_min+1);
 
-        param_get(param_find("ANG_TILT_MIN"), &_param_mc_ang_tilt_min);
-        param_get(param_find("ANG_TILT_MAX"), &_param_mc_ang_tilt_max);
+        param_get(param_find("ANG_TILT_MIN1"), _param_mc_ang_tilt_min);
+        param_get(param_find("ANG_TILT_MAX1"), _param_mc_ang_tilt_max);
+        param_get(param_find("ANG_TILT_MIN2"), _param_mc_ang_tilt_min+1);
+        param_get(param_find("ANG_TILT_MAX2"), _param_mc_ang_tilt_max+1);
+
         for(int i =0; i<2; i++)
         {
             m_alpha_min[i]=(2.0f*_param_mc_pwm_tilt_min[i]-(_param_mc_pwm_max+_param_mc_pwm_min))/(_param_mc_pwm_max-_param_mc_pwm_min);
             m_alpha_max[i]=(2.0f*_param_mc_pwm_tilt_max[i]-(_param_mc_pwm_max+_param_mc_pwm_min))/(_param_mc_pwm_max-_param_mc_pwm_min);
-            m_alpha_a[i] = (-1-1)/(_param_mc_ang_tilt_min-_param_mc_ang_tilt_max);
-            m_alpha_b[i] = -1 - m_alpha_a[i]*_param_mc_ang_tilt_min;
+            m_alpha_a[i] = (-1-1)/(_param_mc_ang_tilt_min[i]-_param_mc_ang_tilt_max[i]);
+            m_alpha_b[i] = -1 - m_alpha_a[i]*_param_mc_ang_tilt_min[i];
         }
     }
 
@@ -348,7 +351,7 @@ MultirotorMixer::mix_yaw_tilt_controlled(float moment_roll, float moment_pitch, 
     float sum2=fabsf(_geometry[0].j)*_param_mc_mass*9.81f;
 
     float max_ang =2.0f*float(M_PI)/180.f;//degree
-    debug("mg: %f g: %f",double(sum2), double(g(mean_tilt)));
+    //debug("mg: %f g: %f",double(sum2), double(g(mean_tilt)));
 
     *delta_tilt = -math::constrain(g(mean_tilt)*(moment_yaw)/sum2, -max_ang, max_ang);
 
@@ -389,7 +392,7 @@ MultirotorMixer::mix(float *output_sent_to_driver, unsigned space)
     // Do the mixing using the strategy given by the current Airmode configuration
 #ifdef YAW_TILT_CONTROLLED
     float *tilt_motor_pos = output_sent_to_driver+_rotor_count;
-    float mean_tilt=0;//get_control(0, 2);
+    float mean_tilt=-float(M_PI)*math::constrain(get_control(0, 4),0.f,1.f)/2;
     float delta_tilt=0;
     mix_yaw_tilt_controlled(torque_roll, torque_pitch, torque_yaw, thrust, mean_tilt, &delta_tilt, squared_rotor_spd);
 #else
@@ -418,7 +421,7 @@ MultirotorMixer::mix(float *output_sent_to_driver, unsigned space)
 #ifdef YAW_TILT_CONTROLLED
     for(int i =0; i<2; i++)
     {
-        float tilt = delta_tilt;// + (-1+i*2)*mean_tilt;
+        float tilt = delta_tilt + (-1+i*2)*mean_tilt;
         //debug("tilt:%d %f ",i,double(tilt));
 
         float alpha = m_alpha_a[i]*tilt+m_alpha_b[i];

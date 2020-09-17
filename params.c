@@ -71,7 +71,7 @@ PARAM_DEFINE_FLOAT(MC_CT_LIFT, 0.00011f);
 PARAM_DEFINE_FLOAT(MC_CM_DRAG, 2.5e-06f);
 
 /**
- * MC ang max
+ * MC ang max 1
  *
  * @min -360
  * @max 360
@@ -79,10 +79,10 @@ PARAM_DEFINE_FLOAT(MC_CM_DRAG, 2.5e-06f);
  * @increment 0.1
  * @group Multicopter Dynamic
  */
-PARAM_DEFINE_FLOAT(ANG_TILT_MAX, 90);
+PARAM_DEFINE_FLOAT(ANG_TILT_MAX1, 90);
 
 /**
- * MC ang min
+ * MC ang min 1
  *
  * @min -360
  * @max 360
@@ -90,7 +90,31 @@ PARAM_DEFINE_FLOAT(ANG_TILT_MAX, 90);
  * @increment 0.1
  * @group Multicopter Dynamic
  */
-PARAM_DEFINE_FLOAT(ANG_TILT_MIN, -2);
+PARAM_DEFINE_FLOAT(ANG_TILT_MIN1, -2);
+
+
+/**
+ * MC ang max 2
+ *
+ * @min -360
+ * @max 360
+ * @decimal 2
+ * @increment 0.1
+ * @group Multicopter Dynamic
+ */
+PARAM_DEFINE_FLOAT(ANG_TILT_MAX2, 90);
+
+/**
+ * MC ang min 2
+ *
+ * @min -360
+ * @max 360
+ * @decimal 2
+ * @increment 0.1
+ * @group Multicopter Dynamic
+ */
+PARAM_DEFINE_FLOAT(ANG_TILT_MIN2, -2);
+
 
 /**
  * PWM TILT MAX 1

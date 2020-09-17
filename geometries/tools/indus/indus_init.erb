@@ -11,11 +11,17 @@
 
 <% end %>
 
-sh /etc/init.d/rc.mc_defaults
+sh /etc/init.d/rc.vtol_defaults
 set MAV_TYPE <%= mav_type %>
 
 set MIXER <%= model_name %>
 
+param set VT_TYPE 1
+param set FW_ARSP_MODE 1
+param set FW_AIRSPD_MAX 25
+param set FW_AIRSPD_MIN 14
+param set FW_AIRSPD_TRIM 16
+param set FW_L1_PERIOD 12
 
 param set MC_ROLL_P <%= MC_ROLL_P  %>
 
@@ -81,9 +87,14 @@ param set PWM_TILT_MIN2 <%= PWM_TILT_MIN2 %>
 
 
 
-param set ANG_TILT_MIN <%= ANG_TILT_MIN %>
+param set ANG_TILT_MIN1 <%= ANG_TILT_MIN1 %>
 
-param set ANG_TILT_MAX <%= ANG_TILT_MAX %>
+param set ANG_TILT_MAX1 <%= ANG_TILT_MAX1 %>
+
+param set ANG_TILT_MIN2 <%= ANG_TILT_MIN2 %>
+
+param set ANG_TILT_MAX2 <%= ANG_TILT_MAX2 %>
+
 
 param set PWM_MAIN_DIS5 1900
 param set PWM_MAIN_DIS6 1040

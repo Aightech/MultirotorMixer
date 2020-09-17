@@ -43,8 +43,17 @@ if grep -Fq "$MODEL_NAME" ${firmware_dir}/ROMFS/px4fmu_common/init.d-posix/CMake
 then
     echo "[INFO] Model already included in ${firmware_dir}/ROMFS/px4fmu_common/init.d-posix/CMakeLists.txt"
 else
-    sed -i "/px4_add_romfs_files( /a \\\t$MODEL_NAME" ${firmware_dir}/ROMFS/px4fmu_common/init.d-posix/CMakeLists.txt
+    sed -i "/px4_add_romfs_files(/a \\\t${MODEL_ID}_$MODEL_NAME" ${firmware_dir}/ROMFS/px4fmu_common/init.d-posix/CMakeLists.txt
     echo "[INFO] Model included in ${firmware_dir}/ROMFS/px4fmu_common/init.d-posix/CMakeLists.txt"
+fi
+
+#ensure the model is include in mixers
+if grep -Fq "$MODEL_NAME" ${firmware_dir}/ROMFS/px4fmu_common/mixers/CMakeLists.txt
+then
+    echo "[INFO] Model already included in ${firmware_dir}/ROMFS/px4fmu_common/mixers/CMakeLists.txt"
+else
+    sed -i "/px4_add_romfs_files(/a \\\t$$MODEL_NAME.main.mix" ${firmware_dir}/ROMFS/px4fmu_common/mixers/CMakeLists.txt
+    echo "[INFO] Model included in ${firmware_dir}/ROMFS/px4fmu_common/mixers/CMakeLists.txt"
 fi
 
 # create init file

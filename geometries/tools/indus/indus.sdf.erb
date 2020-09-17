@@ -204,7 +204,7 @@
 	      </link>
 	
 	      
-	<%= joint(tilt_name, 'revolute', tilt_name, 'base_link', 0, 1 -2*(index/2), 0,  -90*Math::PI/180, 90*Math::PI/180)%>
+	<%= joint(tilt_name, 'revolute', tilt_name, 'base_link', 0, 1 -2*(index/2), 0,  -190*Math::PI/180, 190*Math::PI/180)%>
 
 	<% if index >1 %>
 	<%= gearJoint(tilt_name+"_gear", tilt_name, "tilt_motor_" + (3-index).to_s, "base_link", 0, 1 -2*(index/2), 0)%>
@@ -377,13 +377,16 @@
 		<%
 		pwm_tilt_max = [PWM_TILT_MAX1, PWM_TILT_MAX2]
 		pwm_tilt_min = [PWM_TILT_MIN1, PWM_TILT_MIN2]
+		ang_tilt_max = [ANG_TILT_MAX1, ANG_TILT_MAX2]
+		ang_tilt_min = [ANG_TILT_MIN1, ANG_TILT_MIN2]
+
 		pwm_max = 1950.0
 		pwm_min = 1000.0
 		
 		alpha_max = (2*pwm_tilt_max[index] - (pwm_max+pwm_min))/(pwm_max-pwm_min)
 		alpha_min = (2*pwm_tilt_min[index] - (pwm_max+pwm_min))/(pwm_max-pwm_min)
-		alpha_a = (-1-1)/(ANG_TILT_MIN - ANG_TILT_MAX)
-		alpha_b = -1 - alpha_a*ANG_TILT_MIN
+		alpha_a = (-1-1)/(ang_tilt_min[index] - ang_tilt_max[index])
+		alpha_b = -1 - alpha_a*ang_tilt_min[index]
 
 		tilt_scale = 2/(alpha_max-alpha_min)/alpha_a
 		tilt_offset =  -(alpha_max+alpha_min)/(alpha_max-alpha_min)/alpha_a -alpha_b/alpha_a
@@ -404,8 +407,13 @@
 				   <d>0.01</d>
 				   <iMax>0.0</iMax>
 				   <iMin>0.0</iMin>
+<% if index==0 %>
 				   <cmdMax><%= 90*Math::PI/180 %></cmdMax>
-				   <cmdMin><%= -2*Math::PI/180 %></cmdMin>
+				   <cmdMin><%= -90*Math::PI/180 %></cmdMin>
+<% else %>
+				   <cmdMax><%= 90*Math::PI/180 %></cmdMax>
+				   <cmdMin><%= -90*Math::PI/180 %></cmdMin>
+<% end %>
 				 </joint_control_pid>
 			</channel>
 		<% end %>
