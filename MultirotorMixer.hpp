@@ -194,7 +194,7 @@ private:
      * @param max_output maximum desired value in outputs
      * @param reduce_only if true, only allow to reduce (substract) a fraction of desaturation_vector
      */
-    void minimize_saturation(const float *desaturation_vector, float *outputs, saturation_status &sat_status,
+    inline void minimize_saturation(const float *desaturation_vector, float *outputs, saturation_status &sat_status,
                  float min_output = 0.f, float max_output = 1.f, bool reduce_only = false) const;
 
 
@@ -255,5 +255,4 @@ private:
 
 
 
-    inline float g(float x);
 };

@@ -322,18 +322,13 @@ void MultirotorMixer::mix_yaw(float yaw, float *outputs)
     minimize_saturation(_tmp_array, outputs, _saturation_status, _param_mc_min_speed2, _param_mc_max_speed2, true);
 }
 
-float
-MultirotorMixer::g(float x)
-{
-    return ((x<=float(M_PI)/4)? float(1/cos(x))
-                       : float(pow(cos(x),4)/pow(cos(M_PI/4),5)) );
-}
 
 void
 MultirotorMixer::mix_yaw_tilt_controlled(float moment_roll, float moment_pitch, float moment_yaw, float thrust, float mean_tilt, float* delta_tilt, float *squared_rotor_spd)
 {
-    float T[4] = {-g(mean_tilt)/(_geometry[0].j*_param_mc_Ct) * moment_roll,
-                  g(mean_tilt)/(_geometry[0].i*_param_mc_Ct) * moment_pitch,
+    float g_mean_tilt = ((mean_tilt<=float(M_PI)/4)? float(1/cos(mean_tilt)): 1.f);// float(pow(cos(mean_tilt),4)/pow(cos(M_PI/4),5)) );
+    float T[4] = {-g_mean_tilt/(_geometry[0].j*_param_mc_Ct) * moment_roll,
+                  g_mean_tilt/(_geometry[0].i*_param_mc_Ct) * moment_pitch,
                   0,
                   1/_param_mc_Ct * thrust };
 
@@ -341,7 +336,7 @@ MultirotorMixer::mix_yaw_tilt_controlled(float moment_roll, float moment_pitch, 
     for (unsigned i = 0; i < _rotor_count; i++) {
         squared_rotor_spd[i] =  0.f;
         for(int j = 0; j <4; j++)
-            squared_rotor_spd[i] += _allocation_matrix[i*4+j]  * T[j];
+            squared_rotor_spd[i] += _allocation_matrix[i*4+j] * T[j];
 
         _tmp_array[i] = _rotors[i].thrust_allocation_coeff; // Thrust will be used to unsaturate if needed
     }
@@ -358,7 +353,7 @@ MultirotorMixer::mix_yaw_tilt_controlled(float moment_roll, float moment_pitch, 
     float max_ang =2.0f*float(M_PI)/180.f;//degree
     //debug("mg: %f g: %f",double(sum2), double(g(mean_tilt)));
 
-    *delta_tilt = -math::constrain(g(mean_tilt)*(moment_yaw)/sum2, -max_ang, max_ang);
+    *delta_tilt = -math::constrain(g_mean_tilt*(moment_yaw)/sum2, -max_ang, max_ang);
 
 
 }
