@@ -37,7 +37,7 @@
 
 //#include <parameters/param.h>
 
-#include <lib/parameters/param.h>
+//#include <lib/parameters/param.h>
 //#include "../../parameters/flashparams/flashparams.h"
 //#include <px4_module_params.h>
 
