@@ -80,8 +80,6 @@ echo "[INFO] geometry file created. (${firmware_dir}/src/lib/mixer/MultirotorMix
 touch  ${firmware_dir}/src/lib/mixer/MultirotorMixer/CMakeLists.txt
 
 
-#To enable the use of parameter in multirotors
-cp CMakeLists_parameters.txt ${firmware_dir}/src/lib/parameters/CMakeLists.txt
 
 
 #### Parameters throught callback ####
